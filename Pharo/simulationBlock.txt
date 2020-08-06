@@ -1,0 +1,39 @@
+m := MonteCarloSimulationPi  new.
+m openInWindowLabeled: 'Approximation of Pi by using the Monte Carlo Simulation'.
+m load: 'C:\Users\Dule\Desktop\dule.txt'.
+m drawBlock: [:c |
+c frameRectangle: (0@0 extent: 500@500) color: Color red.
+c frameOval: (0@0 extent: 500@500) color: Color red.
+
+
+
+inside := 0.
+pi:= 0.
+1 to: m numberOfSimulations do: [: i |
+
+
+( ((((m xCoordinate at: i)-250) squared) + (((m yCoordinate at: i)-250) squared)) sqrt <= 250 ) 
+	ifTrue: [
+		
+		c line: ((m xCoordinate at: i)-1)@(m yCoordinate at:i) to: ((m xCoordinate at: i)+1)@(m yCoordinate at: i) color: Color blue.
+		c line: (m xCoordinate at: i)@((m yCoordinate at:i)-1) to: (m xCoordinate at: i)@((m yCoordinate at: i)+1) color: Color blue.
+		inside := inside + 1.
+		
+		]
+	ifFalse: [
+		
+		c line: ((m xCoordinate at: i)-1)@(m yCoordinate at: i) to: ((m xCoordinate at: i)+1)@(m yCoordinate at: i) color: Color red.
+		c line: (m xCoordinate at: i)@((m yCoordinate at: i)-1) to: (m xCoordinate at: i)@((m yCoordinate at: i)+1) color: Color red.
+		
+		].
+
+
+font := LogicalFont familyName: 'Bitmap DejaVu Sans' pointSize: 40.
+pi:=4*inside/(m numberOfSimulations).
+pi:= pi asFloat.
+c drawString: pi asString at: 100@500 font: font color: Color black.
+
+
+
+]
+]
