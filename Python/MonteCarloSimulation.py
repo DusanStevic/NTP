@@ -19,11 +19,11 @@ import random
 #         csvfile.flush()
 #     csvfile.close()
 if __name__ == "__main__":
-    outFileName=r"C:\Users\Dule\Desktop\dule.txt"
+    outFileName=r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Pharo\MonteCarloSimulationPi.txt"
     outFile=open(outFileName, "w")
 
     # outFile.close()
-    for i in range(10000):
+    for i in range(100000):
         x = random.randint(0, 500)
         y = random.randint(0, 500)
         print(str(x)+' '+str(y))
