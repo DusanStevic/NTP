@@ -1,4 +1,4 @@
-m := MonteCarloSimulationPi  new.
+﻿m := MonteCarloSimulationPi  new.
 m openInWindowLabeled: 'Approximation of Pi by using the Monte Carlo Simulation'.
 m load: 'C:\Users\Dule\Desktop\dule.txt'.
 m drawBlock: [:c |
@@ -28,10 +28,11 @@ pi:= 0.
 		].
 
 
-font := LogicalFont familyName: 'Bitmap DejaVu Sans' pointSize: 40.
+
 pi:=4*inside/(m numberOfSimulations).
 pi:= pi asFloat.
-c drawString: pi asString at: 100@500 font: font color: Color black.
+str := 'n=', i asString ,',π≈', pi asString.
+Transcript show: str asString; cr
 
 
 
