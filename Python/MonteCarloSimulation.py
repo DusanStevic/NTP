@@ -1,6 +1,6 @@
 import random
 import time
-from multiprocessing import Process, Queue,Pool
+from multiprocessing import Pool
 
 
 # mcs stands for Monte Carlo Simulation
@@ -34,13 +34,7 @@ def mcs_pi_parallel(number_of_simulations,number_of_processes):
 # outFile.write("""Hello my name is ABCD""")
 # outFile.close()
 
-# def save(self, path, parallel, iter):
-#     with open(f'{path}/{"parallel" if parallel else "serial"}{iter}.mesh', 'w') as file:
-#         for i in range(self.rows):
-#             for j in range(self.columns):
-#                 file.write(f"{self.mesh[i * self.columns + j]} ")
-#             file.write("\n")
-#
+
 # def upis_test(test):
 #     csvfile = open('test_previewA.csv', 'w', newline='',encoding='utf-8')
 #     obj = csv.writer(csvfile)
