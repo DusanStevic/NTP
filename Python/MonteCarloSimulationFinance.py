@@ -9,93 +9,53 @@ from pandas_datareader import data
 from scipy.stats import norm
 
 
-# mcs stands for Monte Carlo Simulation
-# pi=3.1415926535
-def simulation_pi(number_of_simulations):
-    inside = 0
-    for x in range(number_of_simulations):
-        x = random.random()
-        y = random.random()
-        if x * x + y * y < 1:
-            inside = inside + 1
+class MonteCarloSimulationFinance:
+    def __init__(self, number_of_processes):
+        self.number_of_processes = number_of_processes
 
-    return inside
+    def calculate_periodic_daily_return(self):
+        return 4
 
+    # A z-table, also called the standard normal table, is a mathematical table that allows us to know
+    # the percentage of values below (to the left) a z-score in a standard normal distribution (SND).
+    # A z-score, also known as a standard score, indicates the number of standard deviations
+    # a raw score lays above or below the mean. When the mean of the z-score is calculated it is always 0,
+    # and the standard deviation (variance) is always in increments of 1.
+    def calculate_z_score(self):
+        return norm.ppf(random.random())
 
-def mcs_pi_serial(number_of_simulations):
-    return 4 * simulation_pi(number_of_simulations) / number_of_simulations
+    def calculate_average_daily_return(self,data):
+        return np.mean(data)
 
+    def calculate_variance(self,data):
+        return np.var(data)
 
-def mcs_pi_parallel(number_of_simulations, number_of_processes):
-    pool = Pool(processes=number_of_processes)
-    number_of_simulations_per_process = int(number_of_simulations / number_of_processes)
-    simulations_per_process = []
-    simulations_per_process += number_of_processes * [number_of_simulations_per_process]
-    inside_sum = pool.map(simulation_pi, simulations_per_process)
-    return 4 * sum(inside_sum) / number_of_simulations
+    def calculate_standard_deviation(self,data):
+        return np.std(data)
 
+    def calculate_drift(self,data):
+        return self.calculate_average_daily_return(data) - self.calculate_variance(data) / 2
 
-def calculate_periodic_daily_return():
-    return 4
+    def calculate_random_value(self,data):
+        return self.calculate_standard_deviation(data) * self.calculate_z_score()
 
+    def simulation_finance(self,number_of_simulations):
+        inside = 0
+        for x in range(number_of_simulations):
+            x = random.random()
+            y = random.random()
+            if x * x + y * y < 1:
+                inside = inside + 1
 
-# A z-table, also called the standard normal table, is a mathematical table that allows us to know
-# the percentage of values below (to the left) a z-score in a standard normal distribution (SND).
-# A z-score, also known as a standard score, indicates the number of standard deviations
-# a raw score lays above or below the mean. When the mean of the z-score is calculated it is always 0,
-# and the standard deviation (variance) is always in increments of 1.
-def calculate_z_score():
-    return norm.ppf(random.random())
+        return inside
 
+    def mcs_finance_serial(self,number_of_simulations):
+        pass
 
-def calculate_average_daily_return(data):
-    return np.mean(data)
-
-
-def calculate_variance(data):
-    return np.var(data)
-
-
-def calculate_standard_deviation(data):
-    return np.std(data)
+    def mcs_finance_parallel(self, number_of_simulations):
+        pass
 
 
-def calculate_drift(data):
-    return calculate_average_daily_return(data) - calculate_variance(data) / 2
-
-
-def calculate_random_value(data):
-    return calculate_standard_deviation(data) * calculate_z_score()
-
-
-def simulation_finance(number_of_simulations):
-    inside = 0
-    for x in range(number_of_simulations):
-        x = random.random()
-        y = random.random()
-        if x * x + y * y < 1:
-            inside = inside + 1
-
-    return inside
-
-
-def mcs_finance_serial(number_of_simulations):
-    return 'finance'
-
-
-# outFileName=""C:\Users\Dule\Desktop\dule.txt""
-# outFile=open(outFileName, "w")
-# outFile.write("""Hello my name is ABCD""")
-# outFile.close()
-
-
-# def upis_test(test):
-#     csvfile = open('test_previewA.csv', 'w', newline='',encoding='utf-8')
-#     obj = csv.writer(csvfile)
-#     for row in test:
-#         obj.writerow(row)
-#         csvfile.flush()
-#     csvfile.close()
 if __name__ == "__main__":
     # OVO SLJAKA
     # outFileName=r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Pharo\MonteCarloSimulationPi.txt"
@@ -107,11 +67,15 @@ if __name__ == "__main__":
     #     outFile.write(str(x)+' '+str(y)+'\n')
     # outFile.close()
 
-    # start = time.time()
-    # print(mcs_pi_serial(100_000_000))
-    # print(mcs_pi_parallel(100_000_000,5))
-    # end = time.time()
-    # print("vreme izvrsenja:" + str(end - start) + " sekundi")
+    monte_carlo_simulation_finance = MonteCarloSimulationFinance(5)
+    start = time.time()
+    # print("Approximation of Pi by using the Monte Carlo simulation serial version:" + str(
+    # monte_carlo_simulation_pi.mcs_pi_serial(10000000)))
+    #print("Approximation of Pi by using the Monte Carlo simulation parallel version:" + str(
+        #monte_carlo_simulation_pi.mcs_pi_parallel(10000000)))
+    end = time.time()
+    duration = end - start
+    print(f"Duration {duration} seconds")
 
     start_date = '1980-01-01'
     end_date = '2019-12-31'
@@ -129,12 +93,12 @@ if __name__ == "__main__":
     print(rez)
     print(log)
 
-    print(calculate_average_daily_return(log))
-    print('ovo je varijansa:' + str(calculate_variance(log)))
-    print('ovo je standardna devijacija:' + str(calculate_standard_deviation(log)))
+    #print(calculate_average_daily_return(log))
+    #print('ovo je varijansa:' + str(calculate_variance(log)))
+    #print('ovo je standardna devijacija:' + str(calculate_standard_deviation(log)))
 
-    drift = calculate_drift(log)
-    random_value = calculate_random_value(log)
+    #drift = calculate_drift(log)
+    #random_value = calculate_random_value(log)
 
     print(time_series.tail(30))
 
@@ -145,18 +109,12 @@ if __name__ == "__main__":
     # plt.legend(loc='upper right')
     # plt.show()
 
-    #print(time_series.iloc[-1])
-    #print(time_series.iloc[-2]*pow(math.e, (drift+random_value)))
+    # print(time_series.iloc[-1])
+    # print(time_series.iloc[-2]*pow(math.e, (drift+random_value)))
     predictions = []
     predictions.append(time_series.iloc[-30])
-    #30 days prediction
-    for i in range(30):
-        predictions.append(predictions[-1]*pow(math.e, (drift+random_value)))
-    for i in predictions:
-        print(i)
-
-
-
-
-
-
+    # 30 days prediction
+    #for i in range(30):
+     #   predictions.append(predictions[-1] * pow(math.e, (drift + random_value)))
+    #for i in predictions:
+     #   print(i)

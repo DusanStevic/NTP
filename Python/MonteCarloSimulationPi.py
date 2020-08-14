@@ -40,11 +40,10 @@ class MonteCarloSimulationPi:
 
 
 if __name__ == "__main__":
-    start = time.time()
     monte_carlo_simulation_pi = MonteCarloSimulationPi(5)
-
-    #print("Approximation of Pi by using the Monte Carlo simulation serial version:" + str(
-        #monte_carlo_simulation_pi.mcs_pi_serial(10000000)))
+    start = time.time()
+    # print("Approximation of Pi by using the Monte Carlo simulation serial version:" + str(
+    # monte_carlo_simulation_pi.mcs_pi_serial(10000000)))
     print("Approximation of Pi by using the Monte Carlo simulation parallel version:" + str(
         monte_carlo_simulation_pi.mcs_pi_parallel(10000000)))
     end = time.time()
