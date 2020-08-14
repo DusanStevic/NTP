@@ -107,53 +107,53 @@ if __name__ == "__main__":
     #     outFile.write(str(x)+' '+str(y)+'\n')
     # outFile.close()
 
-    start = time.time()
-    #print(mcs_pi_serial(100_000))
-    print(mcs_pi_parallel(1000,5))
-    end = time.time()
-    print("vreme izvrsenja:" + str(end - start) + " sekundi")
+    # start = time.time()
+    # print(mcs_pi_serial(100_000_000))
+    # print(mcs_pi_parallel(100_000_000,5))
+    # end = time.time()
+    # print("vreme izvrsenja:" + str(end - start) + " sekundi")
 
-    # start_date = '1980-01-01'
-    # end_date = '2019-12-31'
-    # stocks = data.DataReader('AAPL', 'yahoo', start_date, end_date)
-    # stocks = stocks.dropna()
-    # time_series = stocks['Close']
-    # # print(time_series)
-    # l = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-    # rez = []
-    # for index in range(1, len(l)):
-    #     rez.append(math.log(l[index] / l[index - 1]))
-    #
-    # l = pd.DataFrame(l)
-    # log = np.log(time_series).diff()
-    # print(rez)
-    # print(log)
-    #
-    # print(calculate_average_daily_return(log))
-    # print('ovo je varijansa:' + str(calculate_variance(log)))
-    # print('ovo je standardna devijacija:' + str(calculate_standard_deviation(log)))
-    #
-    # drift = calculate_drift(log)
-    # random_value = calculate_random_value(log)
-    #
-    # print(time_series.tail(30))
-    #
-    # # time_series.plot(figsize=(20, 10))
-    # # plt.title('Closing stock price')
-    # # plt.ylabel('Stock Price($)')
-    # # plt.xlabel('Date')
-    # # plt.legend(loc='upper right')
-    # # plt.show()
-    #
-    # #print(time_series.iloc[-1])
-    # #print(time_series.iloc[-2]*pow(math.e, (drift+random_value)))
-    # predictions = []
-    # predictions.append(time_series.iloc[-30])
-    # #30 days prediction
-    # for i in range(30):
-    #     predictions.append(predictions[-1]*pow(math.e, (drift+random_value)))
-    # for i in predictions:
-    #     print(i)
+    start_date = '1980-01-01'
+    end_date = '2019-12-31'
+    stocks = data.DataReader('AAPL', 'yahoo', start_date, end_date)
+    stocks = stocks.dropna()
+    time_series = stocks['Close']
+    # print(time_series)
+    l = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    rez = []
+    for index in range(1, len(l)):
+        rez.append(math.log(l[index] / l[index - 1]))
+
+    l = pd.DataFrame(l)
+    log = np.log(time_series).diff()
+    print(rez)
+    print(log)
+
+    print(calculate_average_daily_return(log))
+    print('ovo je varijansa:' + str(calculate_variance(log)))
+    print('ovo je standardna devijacija:' + str(calculate_standard_deviation(log)))
+
+    drift = calculate_drift(log)
+    random_value = calculate_random_value(log)
+
+    print(time_series.tail(30))
+
+    # time_series.plot(figsize=(20, 10))
+    # plt.title('Closing stock price')
+    # plt.ylabel('Stock Price($)')
+    # plt.xlabel('Date')
+    # plt.legend(loc='upper right')
+    # plt.show()
+
+    #print(time_series.iloc[-1])
+    #print(time_series.iloc[-2]*pow(math.e, (drift+random_value)))
+    predictions = []
+    predictions.append(time_series.iloc[-30])
+    #30 days prediction
+    for i in range(30):
+        predictions.append(predictions[-1]*pow(math.e, (drift+random_value)))
+    for i in predictions:
+        print(i)
 
 
 
