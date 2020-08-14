@@ -10,13 +10,18 @@ class MonteCarloSimulationPi:
     # mcs stands for Monte Carlo Simulation
     # pi=3.1415926535
     def simulation_pi(self, number_of_simulations):
+        # r before string converts normal string to raw string
         path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Pharo\MonteCarloSimulationPi.txt"
         out_file = open(path, "w")
         inside = 0
         for x in range(number_of_simulations):
             x = random.random()
             y = random.random()
+            # Pharo for Data Visualization. Circle of radius 250 centered at the point(250, 250).
+            # To create a Rectangle in Pharo you must provide the top left and the bottom right points.
             out_file.write(str(int(x * 500)) + ' ' + str(int(y * 500)) + '\n')
+            # The unit circle is the circle of radius 1 centered at the origin(0, 0)
+            # in the Cartesia coordinate system in the Euclidean plane.
             if x * x + y * y < 1:
                 inside = inside + 1
         out_file.close()
@@ -35,20 +40,13 @@ class MonteCarloSimulationPi:
 
 
 if __name__ == "__main__":
-    # OVO SLJAKA
-    # outFileName=r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Pharo\MonteCarloSimulationPi.txt"
-    # outFile=open(outFileName, "w")
-    # for i in range(100):
-    #     x = random.randint(0, 500)
-    #     y = random.randint(0, 500)
-    #     print(str(x)+' '+str(y))
-    #     outFile.write(str(x)+' '+str(y)+'\n')
-    # outFile.close()
-
     start = time.time()
     monte_carlo_simulation_pi = MonteCarloSimulationPi(5)
 
-    print(monte_carlo_simulation_pi.mcs_pi_serial(100000))
-    # print(monte_carlo_simulation_pi.mcs_pi_parallel(10000000))
+    #print("Approximation of Pi by using the Monte Carlo simulation serial version:" + str(
+        #monte_carlo_simulation_pi.mcs_pi_serial(10000000)))
+    print("Approximation of Pi by using the Monte Carlo simulation parallel version:" + str(
+        monte_carlo_simulation_pi.mcs_pi_parallel(10000000)))
     end = time.time()
-    print("vreme izvrsenja:" + str(end - start) + " sekundi")
+    duration = end - start
+    print(f"Duration {duration} seconds")
