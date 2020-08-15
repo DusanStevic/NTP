@@ -1,6 +1,6 @@
-| tab b colors icons deco image elements |
+| tab b colors icons deco elements |
 	tab := RTTabTable new 
-			input: 'C:\Users\Dule\Desktop\finance.txt' asFileReference contents 
+			input: 'C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Pharo\MonteCarloSimulationFinance.txt' asFileReference contents 
 			usingDelimiter: $,.
 b := RTGrapher new.
 b extent: 1000 @ 400.
@@ -66,14 +66,4 @@ deco legendLabel
 b addDecorator: deco.
 b build.
 elements := b view canvas shapes asGroup.
-image := 'https://dl.dropboxusercontent.com/s/v5b7fg4gzb4w4xs/dota.jpeg?dl=0'.
-image := (TRPlatform current download: image) contents.
-image := RTBitmap new
-	form: (TRPlatform current formClass fromBinaryStream: image readStream);
-	element.
-b view add: image.
-image pushBack.
-(RTConstraint on: image background: elements)
-	center;
-	move.
 ^ b view
