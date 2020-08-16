@@ -1,19 +1,20 @@
 | tab b colors icons deco elements |
+numberOfSimulations:=0.
 	tab := RTTabTable new 
 			input: 'C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Pharo\MonteCarloSimulationFinance.txt' asFileReference contents 
 			usingDelimiter: $,.
+tab values do: [ :row |numberOfSimulations:=numberOfSimulations+1. ].
 b := RTGrapher new.
 b extent: 1000 @ 400.
-colors := (Array
-	with: '#5e3782'
-	with: '#d49935'
-	with: '#81211d'
-	with: '#238999') collect: [ :c | Color colorFrom: c ].
-icons := Array
-	with: RTPolygon diamond
-	with: RTEllipse new
-	with: RTBox new
-	with: RTPolygon star.
+colorsArray := Array new: numberOfSimulations. 
+iconsArray := Array new: numberOfSimulations.
+1 to: numberOfSimulations do: [ :i |
+	colorsArray at: i put: '#5e3782'.
+	iconsArray at: i put: RTPolygon diamond. 
+		
+].
+colors := (colorsArray) collect: [ :c | Color colorFrom: c ].
+icons := iconsArray.
 icons
 	doWithIndex: [ :ic :i | 
 		ic
