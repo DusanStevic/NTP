@@ -1,5 +1,6 @@
 | tab b colors icons deco elements |
 numberOfSimulations:=0.
+
 	tab := RTTabTable new 
 			input: 'C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Pharo\MonteCarloSimulationFinance.txt' asFileReference contents 
 			usingDelimiter: $,.
@@ -9,7 +10,9 @@ b extent: 1000 @ 400.
 colorsArray := Array new: numberOfSimulations. 
 iconsArray := Array new: numberOfSimulations.
 1 to: numberOfSimulations do: [ :i |
-	colorsArray at: i put: '#5e3782'.
+	"Random 6 Digit Number Color Generator"
+   randomColorPicker:=(100000 to: 999999) atRandom.
+	colorsArray at: i put: '#', randomColorPicker asString.
 	iconsArray at: i put: RTPolygon diamond. 
 		
 ].
