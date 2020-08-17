@@ -39,8 +39,9 @@ class MonteCarloSimulationFinance:
     def calculate_random_value(self,data):
         return self.calculate_standard_deviation(data) * self.calculate_z_score()
 
-    def simulation_finance(self,number_of_simulations):
-        inside = 0
+    # prediction window size: number of prediction days per simulation
+    def simulation_finance(self,number_of_simulations,prediction_window_size):
+        predictions = []
         for x in range(number_of_simulations):
             x = random.random()
             y = random.random()

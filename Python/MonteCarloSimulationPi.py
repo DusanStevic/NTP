@@ -14,7 +14,7 @@ class MonteCarloSimulationPi:
         path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Pharo\MonteCarloSimulationPi.txt"
         out_file = open(path, "w")
         inside = 0
-        for x in range(number_of_simulations):
+        for _ in range(number_of_simulations):
             x = random.random()
             y = random.random()
             # Pharo for Data Visualization. Circle of radius 250 centered at the point(250, 250).
