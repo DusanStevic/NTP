@@ -34,6 +34,9 @@ class MonteCarloSimulationPi:
         pool = Pool(processes=self.number_of_processes)
         number_of_simulations_per_process = int(number_of_simulations / self.number_of_processes)
         simulations_per_process = []
+        # Append the same value multiple times to a list
+        # To add v, n times, to l:
+        # l += n * [v]
         simulations_per_process += self.number_of_processes * [number_of_simulations_per_process]
         inside_sum = pool.map(self.simulation_pi, simulations_per_process)
         return 4 * sum(inside_sum) / number_of_simulations

@@ -66,19 +66,37 @@ class MonteCarloSimulationFinance:
             prediction.clear()
         return predictions
 
-    def mcs_finance_serial(self, number_of_simulations):
-        pass
+    def mcs_finance_serial(self, number_of_simulations,prediction_window_size):
+        return self.simulation_finance(number_of_simulations,prediction_window_size)
 
-    def mcs_finance_parallel(self, number_of_simulations):
-        pass
+    def mcs_finance_parallel(self, number_of_simulations,prediction_window_size):
+        pool = Pool(processes=self.number_of_processes)
+        number_of_simulations_per_process = int(number_of_simulations / self.number_of_processes)
+        simulations_per_process = []
+        # Append the same value multiple times to a list
+        # To add v, n times, to l:
+        # l += n * [v]
+        # Mapping a function with multiple arguments to a multiprocessing pool will distribute
+        # the input data across processes to be run with the referenced function.
+        simulations_per_process += self.number_of_processes * [(number_of_simulations_per_process,prediction_window_size)]
+        rez = pool.starmap(self.simulation_finance, simulations_per_process)
+        return rez
 
 
 if __name__ == "__main__":
+    monte_carlo_simulation_finance = MonteCarloSimulationFinance('1980-01-01', '2019-12-31', 'AAPL', 5)
+    monte_carlo_simulation_finance.data_acquisition()
+    monte_carlo_simulation_finance.calculate_periodic_daily_return()
+    start = time.time()
+    #print("Stock market price predictions using the Monte Carlo simulation serial version:" + str(
+    #monte_carlo_simulation_finance.mcs_finance_serial(10, 5)))
+    print("Stock market price predictions using the Monte Carlo simulation parallel version:" + str(
+        monte_carlo_simulation_finance.mcs_finance_parallel(10, 5)))
+    end = time.time()
+    duration = end - start
+    print(f"Duration {duration} seconds")
 
-    m = MonteCarloSimulationFinance('1980-01-01', '2019-12-31', 'AAPL', 5)
-    m.data_acquisition()
-    m.calculate_periodic_daily_return()
-    print(m.simulation_finance(3, 5))
+    #print(monte_carlo_simulation_finance.simulation_finance(10000,5))
 
 
 
