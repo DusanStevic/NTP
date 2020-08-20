@@ -1,13 +1,12 @@
+import copy
+import math
 import random
 import time
 from multiprocessing import Pool
-import math
-import pandas as pd
+
 import numpy as np
-import matplotlib.pyplot as plt
 from pandas_datareader import data
 from scipy.stats import norm
-import copy
 
 
 class MonteCarloSimulationFinance:
@@ -24,9 +23,13 @@ class MonteCarloSimulationFinance:
         stocks = stocks.dropna()
         self.time_series = stocks['Close']
 
-
+    # Differencing time series = Shifting and lagging time series
     def calculate_periodic_daily_return(self):
+        # Differencing time series
+        # The diff() function calculates the first differences of the time series.
         self.data= np.log(self.time_series).diff().dropna()
+        # Shifting and lagging time series
+        #self.data=np.log(self.time_series / self.time_series.shift(1)).dropna()
 
     # A z-table, also called the standard normal table, is a mathematical table that allows us to know
     # the percentage of values below (to the left) a z-score in a standard normal distribution (SND).
@@ -96,7 +99,7 @@ if __name__ == "__main__":
     duration = end - start
     print(f"Duration {duration} seconds")
 
-    #print(monte_carlo_simulation_finance.simulation_finance(10000,5))
+    print(monte_carlo_simulation_finance.calculate_average_daily_return())
 
 
 
