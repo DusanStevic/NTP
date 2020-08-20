@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello Monte Carlo Simulation")
+	fmt.Println("Hello Monte Carlo Simulation Pi")
 }
