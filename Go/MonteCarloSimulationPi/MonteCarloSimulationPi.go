@@ -6,6 +6,9 @@ import (
 	"time"
 )
 
+// mcs stands for Monte Carlo Simulation
+// pi=3.1415926535
+
 // MonteCarloSimulationPi is a structure to calculate pi using Monte Carlo simulation.
 type MonteCarloSimulationPi struct {
 	numberOfProcesses int
@@ -42,8 +45,12 @@ func (monteCarloSimulationPi *MonteCarloSimulationPi) simulationPi(numberOfSimul
 	return inside
 }
 
+func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiSerial(numberOfSimulations int) float64 {
+	return 4 * float64(monteCarloSimulationPi.simulationPi(numberOfSimulations)) / float64(numberOfSimulations)
+}
+
 func main() {
 	monteCarloSimulationPi := MonteCarloSimulationPi{numberOfProcesses: 5}
-	fmt.Println(monteCarloSimulationPi.simulationPi(10000000))
+	fmt.Println(monteCarloSimulationPi.mcsPiSerial(10000000))
 	monteCarloSimulationPi.simulationPi(1000)
 }
