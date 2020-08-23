@@ -14,7 +14,7 @@ type MonteCarloSimulationPi struct {
 	numberOfProcesses int
 }
 
-func (monteCarloSimulationPi *MonteCarloSimulationPi) simulationPi(numberOfSimulations int) int {
+func (monteCarloSimulationPi *MonteCarloSimulationPi) simulationPi(numberOfSimulations int, channel chan int) {
 	inside := 0
 	// Source code for random number generator https://play.golang.org/p/ZdFpbahgC1
 	// The default number generator is deterministic, so it'll
@@ -42,15 +42,39 @@ func (monteCarloSimulationPi *MonteCarloSimulationPi) simulationPi(numberOfSimul
 		}
 	}
 
-	return inside
+	channel <- inside
 }
 
 func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiSerial(numberOfSimulations int) float64 {
-	return 4 * float64(monteCarloSimulationPi.simulationPi(numberOfSimulations)) / float64(numberOfSimulations)
+	channel := make(chan int)
+	go monteCarloSimulationPi.simulationPi(numberOfSimulations, channel)
+	inside := <-channel
+	return 4 * float64(inside) / float64(numberOfSimulations)
+}
+
+func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiParallel(numberOfSimulations int) float64 {
+
+	numberOfSimulationsPerProcess := numberOfSimulations / monteCarloSimulationPi.numberOfProcesses
+	channel := make(chan int, monteCarloSimulationPi.numberOfProcesses)
+
+	for j := 0; j < monteCarloSimulationPi.numberOfProcesses; j++ {
+		go monteCarloSimulationPi.simulationPi(numberOfSimulationsPerProcess, channel)
+	}
+
+	var inside int
+	for i := 0; i < monteCarloSimulationPi.numberOfProcesses; i++ {
+		inside += <-channel
+	}
+
+	return 4 * float64(inside) / float64(numberOfSimulations)
 }
 
 func main() {
-	monteCarloSimulationPi := MonteCarloSimulationPi{numberOfProcesses: 5}
-	fmt.Println(monteCarloSimulationPi.mcsPiSerial(10000000))
-	monteCarloSimulationPi.simulationPi(1000)
+	monteCarloSimulationPi := MonteCarloSimulationPi{numberOfProcesses: 4}
+	start := time.Now()
+	fmt.Println(monteCarloSimulationPi.mcsPiSerial(1000000000))
+	//fmt.Println(monteCarloSimulationPi.mcsPiParallel(1000000000))
+	duration := time.Since(start)
+	fmt.Println("duration:", duration)
+
 }
