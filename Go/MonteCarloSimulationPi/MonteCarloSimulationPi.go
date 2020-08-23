@@ -57,7 +57,7 @@ func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiParallel(numberOfSimu
 	numberOfSimulationsPerProcess := numberOfSimulations / monteCarloSimulationPi.numberOfProcesses
 	channel := make(chan int, monteCarloSimulationPi.numberOfProcesses)
 
-	for j := 0; j < monteCarloSimulationPi.numberOfProcesses; j++ {
+	for i := 0; i < monteCarloSimulationPi.numberOfProcesses; i++ {
 		go monteCarloSimulationPi.simulationPi(numberOfSimulationsPerProcess, channel)
 	}
 
@@ -72,8 +72,8 @@ func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiParallel(numberOfSimu
 func main() {
 	monteCarloSimulationPi := MonteCarloSimulationPi{numberOfProcesses: 4}
 	start := time.Now()
-	fmt.Println(monteCarloSimulationPi.mcsPiSerial(1000000000))
-	//fmt.Println(monteCarloSimulationPi.mcsPiParallel(1000000000))
+	//fmt.Println(monteCarloSimulationPi.mcsPiSerial(1000000000))
+	fmt.Println(monteCarloSimulationPi.mcsPiParallel(1000000000))
 	duration := time.Since(start)
 	fmt.Println("duration:", duration)
 
