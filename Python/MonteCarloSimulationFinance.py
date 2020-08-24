@@ -19,9 +19,9 @@ class MonteCarloSimulationFinance:
         self.number_of_processes = number_of_processes
 
     def data_acquisition(self):
-        stocks = data.DataReader(self.ticker_symbol, 'yahoo', self.start_date, self.end_date)
-        stocks = stocks.dropna()
-        self.time_series = stocks['Close']
+        stock = data.DataReader(self.ticker_symbol, 'yahoo', self.start_date, self.end_date)
+        stock = stock.dropna()
+        self.time_series = stock['Close']
 
     # Differencing time series = Shifting and lagging time series
     def calculate_periodic_daily_return(self):
