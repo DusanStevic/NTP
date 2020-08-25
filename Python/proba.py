@@ -99,7 +99,7 @@ if __name__ == "__main__":
     duration = end - start
     print(f"Duration {duration} seconds")
 
-    print(monte_carlo_simulation_finance.calculate_average_daily_return())
+    print(monte_carlo_simulation_finance.timeseries)
 
 
 

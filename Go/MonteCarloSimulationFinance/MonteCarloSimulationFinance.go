@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
-	"reflect"
+	"os"
 	"time"
 
 	"github.com/chobie/go-gaussian"
@@ -19,6 +19,7 @@ type MonteCarloSimulationFinance struct {
 	startDate         string
 	endDate           string
 	tickerSymbol      string
+	data              []float64
 }
 
 func (monteCarloSimulationFinance *MonteCarloSimulationFinance) dataAcquisition() {
@@ -56,39 +57,66 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) calculateZScore(
 
 }
 
+// Differencing time series = Shifting and lagging time series
+func (monteCarloSimulationFinance *MonteCarloSimulationFinance) calculatePeriodicDailyReturn() {
+	for i := 1; i < len(monteCarloSimulationFinance.timeSeries); i++ {
+		monteCarloSimulationFinance.data = append(monteCarloSimulationFinance.data,
+			math.Log(monteCarloSimulationFinance.timeSeries[i]/monteCarloSimulationFinance.timeSeries[i-1]))
+	}
+}
+
+// https://github.com/gonum/gonum
+// https://godoc.org/gonum.org/v1/gonum/stat#Mean
+func (monteCarloSimulationFinance *MonteCarloSimulationFinance) calculateAverageDailyReturn() float64 {
+	/* 	computes the weighted mean of the dataset.
+	   	we don't have any weights (ie: all weights are 1)
+	   	so we just pass a nil slice. */
+	return stat.Mean(monteCarloSimulationFinance.data, nil)
+}
+
+// https://github.com/gonum/gonum
+// https://godoc.org/gonum.org/v1/gonum/stat#Variance
+func (monteCarloSimulationFinance *MonteCarloSimulationFinance) calculateVariance() float64 {
+	/* 	computes the weighted variance of the dataset.
+	   	we don't have any weights (ie: all weights are 1)
+	   	so we just pass a nil slice. */
+	return stat.Variance(monteCarloSimulationFinance.data, nil)
+
+}
+
+func (monteCarloSimulationFinance *MonteCarloSimulationFinance) calculateStandardDeviation() float64 {
+	return math.Sqrt(monteCarloSimulationFinance.calculateVariance())
+
+}
+
+func (monteCarloSimulationFinance *MonteCarloSimulationFinance) calculateDrift() float64 {
+	return monteCarloSimulationFinance.calculateAverageDailyReturn() - monteCarloSimulationFinance.calculateVariance()/2
+}
+
+func (monteCarloSimulationFinance *MonteCarloSimulationFinance) calculateRandomValue() float64 {
+	return monteCarloSimulationFinance.calculateStandardDeviation() * monteCarloSimulationFinance.calculateZScore()
+}
+
 func main() {
 	monteCarloSimulationFinance := MonteCarloSimulationFinance{
-		tickerSymbol:      "spy",
-		startDate:         "2016-01-01",
-		endDate:           "2016-04-01",
+		tickerSymbol:      "AAPL",
+		startDate:         "2000-01-01",
+		endDate:           "2020-01-01",
 		numberOfProcesses: 4}
 	monteCarloSimulationFinance.dataAcquisition()
+	monteCarloSimulationFinance.calculatePeriodicDailyReturn()
 
-	stock, _ := quote.NewQuoteFromYahoo("spy", "2016-01-01", "2016-04-01", quote.Daily, true)
-	fmt.Print(stock.CSV())
-
-	xs := []float64{
-		32.32, 56.98, 21.52, 44.32,
-		55.63, 13.75, 43.47, 43.34,
-		12.34,
+	f, err := os.Create("C:\\Users\\Dule\\Desktop\\telep.txt") // creating...
+	if err != nil {
+		fmt.Printf("error creating file: %v", err)
+		return
 	}
-	xs = monteCarloSimulationFinance.timeSeries
-
-	fmt.Printf("data: %v\n", xs)
-
-	// computes the weighted mean of the dataset.
-	// we don't have any weights (ie: all weights are 1)
-	// so we just pass a nil slice.
-	mean := stat.Mean(xs, nil)
-
-	variance := stat.Variance(xs, nil)
-	stddev := math.Sqrt(variance)
-
-	fmt.Printf("mean=     %v\n", mean)
-
-	fmt.Printf("variance= %v\n", variance)
-	fmt.Printf("std-dev=  %v\n", stddev)
-	fmt.Println(reflect.TypeOf(stock.Close))
-
-	fmt.Println(monteCarloSimulationFinance.calculateZScore())
+	defer f.Close()
+	for i := 0; i < len(monteCarloSimulationFinance.timeSeries); i++ { // Generating...
+		_, err = f.WriteString(fmt.Sprintf("%f\r\n", monteCarloSimulationFinance.timeSeries[i])) // writing...
+		if err != nil {
+			fmt.Printf("error writing string: %v", err)
+		}
+	}
+	fmt.Println(monteCarloSimulationFinance.calculateAverageDailyReturn())
 }
