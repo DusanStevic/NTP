@@ -22,6 +22,8 @@ type MonteCarloSimulationFinance struct {
 	data              []float64
 }
 
+// https://github.com/markcheno/go-quote
+// https://godoc.org/github.com/markcheno/go-quote#NewQuoteFromYahoo
 func (monteCarloSimulationFinance *MonteCarloSimulationFinance) dataAcquisition() {
 	stock, _ := quote.NewQuoteFromYahoo(monteCarloSimulationFinance.tickerSymbol,
 		monteCarloSimulationFinance.startDate, monteCarloSimulationFinance.endDate, quote.Daily, true)
@@ -97,6 +99,28 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) calculateRandomV
 	return monteCarloSimulationFinance.calculateStandardDeviation() * monteCarloSimulationFinance.calculateZScore()
 }
 
+func (monteCarloSimulationFinance *MonteCarloSimulationFinance) simulationFinance(numberOfSimulations int, predictionWindowSize int) [][]float64 {
+	var prediction []float64
+	var predictions [][]float64
+	for i := 0; i < numberOfSimulations; i++ {
+		// today’s price
+		prediction = append(prediction, monteCarloSimulationFinance.timeSeries[len(monteCarloSimulationFinance.timeSeries)-1])
+		for j := 0; j < predictionWindowSize; j++ {
+			// Next Day’s Price=Today’s Price × e^(Drift+Random Value)
+			prediction = append(prediction,
+				prediction[len(prediction)-1]*math.Pow(math.E, (monteCarloSimulationFinance.calculateDrift()+monteCarloSimulationFinance.calculateRandomValue())))
+		}
+		predictions = append(predictions, prediction)
+		/* 	Setting the slice to nil is the best way to clear a slice.
+		   	nil slices in go are perfectly well behaved and setting the slice to nil
+		   	will release the underlying memory to the garbage collector. */
+		prediction = nil
+	}
+
+	return predictions
+
+}
+
 func main() {
 	monteCarloSimulationFinance := MonteCarloSimulationFinance{
 		tickerSymbol:      "AAPL",
@@ -118,5 +142,7 @@ func main() {
 			fmt.Printf("error writing string: %v", err)
 		}
 	}
-	fmt.Println(monteCarloSimulationFinance.calculateAverageDailyReturn())
+
+	fmt.Println(monteCarloSimulationFinance.simulationFinance(8, 10))
+
 }
