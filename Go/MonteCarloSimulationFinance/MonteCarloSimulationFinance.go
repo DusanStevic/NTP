@@ -121,6 +121,10 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) simulationFinanc
 
 }
 
+func (monteCarloSimulationFinance *MonteCarloSimulationFinance) mcsFinanceSerial(numberOfSimulations int, predictionWindowSize int) [][]float64 {
+	return monteCarloSimulationFinance.simulationFinance(numberOfSimulations, predictionWindowSize)
+}
+
 func main() {
 	monteCarloSimulationFinance := MonteCarloSimulationFinance{
 		tickerSymbol:      "AAPL",
@@ -143,6 +147,6 @@ func main() {
 		}
 	}
 
-	fmt.Println(monteCarloSimulationFinance.simulationFinance(8, 10))
+	fmt.Println(monteCarloSimulationFinance.mcsFinanceSerial(8, 10))
 
 }
