@@ -55,6 +55,9 @@ func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiSerial(numberOfSimula
 func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiParallel(numberOfSimulations int) float64 {
 
 	numberOfSimulationsPerProcess := numberOfSimulations / monteCarloSimulationPi.numberOfProcesses
+	/* 	Buffered channels are useful when you know how many goroutines you have launched,
+	   	want to limit the number of goroutines you will launch, or want to limit
+	   	the amount of work that is queued up. */
 	channel := make(chan int, monteCarloSimulationPi.numberOfProcesses)
 
 	for i := 0; i < monteCarloSimulationPi.numberOfProcesses; i++ {

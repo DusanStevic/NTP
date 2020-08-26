@@ -99,7 +99,7 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) calculateRandomV
 	return monteCarloSimulationFinance.calculateStandardDeviation() * monteCarloSimulationFinance.calculateZScore()
 }
 
-func (monteCarloSimulationFinance *MonteCarloSimulationFinance) simulationFinance(numberOfSimulations int, predictionWindowSize int) [][]float64 {
+func (monteCarloSimulationFinance *MonteCarloSimulationFinance) simulationFinance(numberOfSimulations int, predictionWindowSize int, channel chan [][]float64) {
 	var prediction []float64
 	var predictions [][]float64
 	for i := 0; i < numberOfSimulations; i++ {
@@ -117,12 +117,15 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) simulationFinanc
 		prediction = nil
 	}
 
-	return predictions
+	channel <- predictions
 
 }
 
 func (monteCarloSimulationFinance *MonteCarloSimulationFinance) mcsFinanceSerial(numberOfSimulations int, predictionWindowSize int) [][]float64 {
-	return monteCarloSimulationFinance.simulationFinance(numberOfSimulations, predictionWindowSize)
+	channel := make(chan [][]float64)
+	go monteCarloSimulationFinance.simulationFinance(numberOfSimulations, predictionWindowSize, channel)
+	predictions := <-channel
+	return predictions
 }
 
 func main() {
