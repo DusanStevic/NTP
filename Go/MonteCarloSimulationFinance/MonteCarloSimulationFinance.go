@@ -128,12 +128,32 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) mcsFinanceSerial
 	return predictions
 }
 
+func (monteCarloSimulationFinance *MonteCarloSimulationFinance) mcsFinanceParallel(numberOfSimulations int, predictionWindowSize int) [][][]float64 {
+	numberOfSimulationsPerProcess := numberOfSimulations / monteCarloSimulationFinance.numberOfProcesses
+	/* 	Buffered channels are useful when you know how many goroutines you have launched,
+	   	want to limit the number of goroutines you will launch, or want to limit
+	   	the amount of work that is queued up. */
+	channel := make(chan [][]float64, monteCarloSimulationFinance.numberOfProcesses)
+	for i := 0; i < monteCarloSimulationFinance.numberOfProcesses; i++ {
+		go monteCarloSimulationFinance.simulationFinance(numberOfSimulationsPerProcess, predictionWindowSize, channel)
+	}
+
+	var predictions [][][]float64
+	for i := 0; i < monteCarloSimulationFinance.numberOfProcesses; i++ {
+		prediction := <-channel
+		predictions = append(predictions, prediction)
+
+	}
+
+	return predictions
+}
+
 func main() {
 	monteCarloSimulationFinance := MonteCarloSimulationFinance{
 		tickerSymbol:      "AAPL",
 		startDate:         "2000-01-01",
 		endDate:           "2020-01-01",
-		numberOfProcesses: 4}
+		numberOfProcesses: 5}
 	monteCarloSimulationFinance.dataAcquisition()
 	monteCarloSimulationFinance.calculatePeriodicDailyReturn()
 
@@ -150,6 +170,6 @@ func main() {
 		}
 	}
 
-	fmt.Println(monteCarloSimulationFinance.mcsFinanceSerial(8, 10))
+	fmt.Println(monteCarloSimulationFinance.mcsFinanceParallel(10, 8))
 
 }
