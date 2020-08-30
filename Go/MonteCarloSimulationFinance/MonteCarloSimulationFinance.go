@@ -5,6 +5,8 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/chobie/go-gaussian"
@@ -20,6 +22,7 @@ type MonteCarloSimulationFinance struct {
 	endDate           string
 	tickerSymbol      string
 	data              []float64
+	parallelFlag      bool
 }
 
 // https://github.com/markcheno/go-quote
@@ -122,6 +125,7 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) simulationFinanc
 }
 
 func (monteCarloSimulationFinance *MonteCarloSimulationFinance) mcsFinanceSerial(numberOfSimulations int, predictionWindowSize int) [][]float64 {
+	monteCarloSimulationFinance.parallelFlag = false
 	channel := make(chan [][]float64)
 	go monteCarloSimulationFinance.simulationFinance(numberOfSimulations, predictionWindowSize, channel)
 	predictions := <-channel
@@ -129,6 +133,7 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) mcsFinanceSerial
 }
 
 func (monteCarloSimulationFinance *MonteCarloSimulationFinance) mcsFinanceParallel(numberOfSimulations int, predictionWindowSize int) [][][]float64 {
+	monteCarloSimulationFinance.parallelFlag = true
 	numberOfSimulationsPerProcess := numberOfSimulations / monteCarloSimulationFinance.numberOfProcesses
 	/* 	Buffered channels are useful when you know how many goroutines you have launched,
 	   	want to limit the number of goroutines you will launch, or want to limit
@@ -148,6 +153,55 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) mcsFinanceParall
 	return predictions
 }
 
+func (monteCarloSimulationFinance *MonteCarloSimulationFinance) exportFinanceFile(numberOfSimulations int, predictionWindowSize int) {
+	//One row in the output file.
+	var row strings.Builder
+	if monteCarloSimulationFinance.parallelFlag == false {
+		var predictions [][]float64 = monteCarloSimulationFinance.mcsFinanceSerial(numberOfSimulations, predictionWindowSize)
+		f, err := os.Create("C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Pharo\\PharoGolangFinanceSerial.txt") // creating...
+		if err != nil {
+			fmt.Printf("error creating file: %v", err)
+			return
+		}
+		defer f.Close()
+		for i := 0; i < 10; i++ { // Generating...
+			_, err = f.WriteString(fmt.Sprintf("%d\n", i)) // writing...
+			if err != nil {
+				fmt.Printf("error writing string: %v", err)
+			}
+		}
+		fmt.Println(predictions)
+	} else {
+		var predictions [][][]float64 = monteCarloSimulationFinance.mcsFinanceParallel(numberOfSimulations, predictionWindowSize)
+		// Creating file
+		f, err := os.Create("C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Pharo\\PharoGolangFinanceParallel.txt")
+		if err != nil {
+			fmt.Printf("Error while creating a file: %v", err)
+			return
+		}
+		defer f.Close()
+		for i := 0; i < len(predictions); i++ {
+			for j := 0; j < len(predictions[i]); j++ {
+				for k := 0; k < len(predictions[i][j]); k++ {
+					//A component in one row of the output file.
+					var component string = strconv.FormatFloat(predictions[i][j][k], 'f', 7, 64)
+					row.WriteString(component + " ")
+					if k == (len(predictions[i][j]) - 1) {
+						row.WriteString("\r\n")
+					}
+				}
+			}
+		}
+		// Writing to file
+		_, err = f.WriteString(row.String())
+		if err != nil {
+			fmt.Printf("Error while writing a file: %v", err)
+		}
+
+	}
+
+}
+
 func main() {
 	monteCarloSimulationFinance := MonteCarloSimulationFinance{
 		tickerSymbol:      "AAPL",
@@ -157,19 +211,7 @@ func main() {
 	monteCarloSimulationFinance.dataAcquisition()
 	monteCarloSimulationFinance.calculatePeriodicDailyReturn()
 
-	f, err := os.Create("C:\\Users\\Dule\\Desktop\\telep.txt") // creating...
-	if err != nil {
-		fmt.Printf("error creating file: %v", err)
-		return
-	}
-	defer f.Close()
-	for i := 0; i < len(monteCarloSimulationFinance.timeSeries); i++ { // Generating...
-		_, err = f.WriteString(fmt.Sprintf("%f\r\n", monteCarloSimulationFinance.timeSeries[i])) // writing...
-		if err != nil {
-			fmt.Printf("error writing string: %v", err)
-		}
-	}
-
 	fmt.Println(monteCarloSimulationFinance.mcsFinanceParallel(10, 8))
+	monteCarloSimulationFinance.exportFinanceFile(10, 8)
 
 }
