@@ -161,17 +161,34 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) exportFinanceFil
 		var predictions [][]float64 = monteCarloSimulationFinance.mcsFinanceSerial(numberOfSimulations, predictionWindowSize)
 		f, err := os.Create("C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Pharo\\PharoGolangFinanceSerial.txt") // creating...
 		if err != nil {
-			fmt.Printf("error creating file: %v", err)
+			fmt.Printf("Error while creating a file: %v", err)
 			return
 		}
 		defer f.Close()
-		for i := 0; i < 10; i++ { // Generating...
-			_, err = f.WriteString(fmt.Sprintf("%d\n", i)) // writing...
-			if err != nil {
-				fmt.Printf("error writing string: %v", err)
+		for i := 0; i < len(predictions); i++ {
+			for j := 0; j < len(predictions[i]); j++ {
+				if j == 0 {
+					// Write a serial number of simulations at the beginning of a file.
+					var serialNumberOfSimulation string = strconv.FormatInt(serialNumber, 10)
+					row.WriteString(serialNumberOfSimulation + "," + " ")
+				}
+
+				//A component in one row of the output file.
+				var component string = strconv.FormatFloat(predictions[i][j], 'f', 7, 64)
+				row.WriteString(component)
+				if j == (len(predictions[i]) - 1) {
+					row.WriteString("\r\n")
+					serialNumber++
+				} else {
+					row.WriteString("," + " ")
+				}
 			}
 		}
-		fmt.Println(predictions)
+		// Writing to file
+		_, err = f.WriteString(row.String())
+		if err != nil {
+			fmt.Printf("Error while writing a file: %v", err)
+		}
 	} else {
 		var predictions [][][]float64 = monteCarloSimulationFinance.mcsFinanceParallel(numberOfSimulations, predictionWindowSize)
 		// Creating file
@@ -222,7 +239,7 @@ func main() {
 	monteCarloSimulationFinance.dataAcquisition()
 	monteCarloSimulationFinance.calculatePeriodicDailyReturn()
 
-	fmt.Println(monteCarloSimulationFinance.mcsFinanceParallel(10, 8))
-	monteCarloSimulationFinance.exportFinanceFile(10, 20)
+	fmt.Println(monteCarloSimulationFinance.mcsFinanceSerial(10, 8))
+	monteCarloSimulationFinance.exportFinanceFile(10, 8)
 
 }
