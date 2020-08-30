@@ -156,6 +156,7 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) mcsFinanceParall
 func (monteCarloSimulationFinance *MonteCarloSimulationFinance) exportFinanceFile(numberOfSimulations int, predictionWindowSize int) {
 	//One row in the output file.
 	var row strings.Builder
+	var serialNumber int64 = 1
 	if monteCarloSimulationFinance.parallelFlag == false {
 		var predictions [][]float64 = monteCarloSimulationFinance.mcsFinanceSerial(numberOfSimulations, predictionWindowSize)
 		f, err := os.Create("C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Pharo\\PharoGolangFinanceSerial.txt") // creating...
@@ -183,12 +184,22 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) exportFinanceFil
 		for i := 0; i < len(predictions); i++ {
 			for j := 0; j < len(predictions[i]); j++ {
 				for k := 0; k < len(predictions[i][j]); k++ {
+					if k == 0 {
+						// Write a serial number of simulations at the beginning of a file.
+						var serialNumberOfSimulation string = strconv.FormatInt(serialNumber, 10)
+						row.WriteString(serialNumberOfSimulation + "," + " ")
+					}
+
 					//A component in one row of the output file.
 					var component string = strconv.FormatFloat(predictions[i][j][k], 'f', 7, 64)
-					row.WriteString(component + " ")
+					row.WriteString(component)
 					if k == (len(predictions[i][j]) - 1) {
 						row.WriteString("\r\n")
+						serialNumber++
+					} else {
+						row.WriteString("," + " ")
 					}
+
 				}
 			}
 		}
@@ -212,6 +223,6 @@ func main() {
 	monteCarloSimulationFinance.calculatePeriodicDailyReturn()
 
 	fmt.Println(monteCarloSimulationFinance.mcsFinanceParallel(10, 8))
-	monteCarloSimulationFinance.exportFinanceFile(10, 8)
+	monteCarloSimulationFinance.exportFinanceFile(10, 20)
 
 }
