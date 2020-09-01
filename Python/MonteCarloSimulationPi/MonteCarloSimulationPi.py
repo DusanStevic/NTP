@@ -69,7 +69,7 @@ if __name__ == "__main__":
     start = time.time()
     monte_carlo_simulation_pi.experiment_flag = True
     print("Approximation of Pi by using the Monte Carlo simulation serial version:" + str(
-    monte_carlo_simulation_pi.mcs_pi_serial(100000000)))
+    monte_carlo_simulation_pi.mcs_pi_serial(100000)))
 
     #print("Approximation of Pi by using the Monte Carlo simulation parallel version:" + str(
         #monte_carlo_simulation_pi.mcs_pi_parallel(100000000)))
