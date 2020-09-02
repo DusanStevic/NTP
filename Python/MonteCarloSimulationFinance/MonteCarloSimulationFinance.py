@@ -95,7 +95,8 @@ class MonteCarloSimulationFinance:
         if self.parallel_flag == False:
             predictions = self.mcs_finance_serial(number_of_simulations, prediction_window_size)
             # r before string converts normal string to raw string
-            path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Pharo\PythonFinanceSerial.txt"
+            path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP" \
+                   r"\Execution Results\Finance\PythonFinanceSerial.txt"
             out_file = open(path, "w")
             for i in range(len(predictions)):
                 for j in range(len(predictions[i])):
@@ -115,7 +116,8 @@ class MonteCarloSimulationFinance:
         else:
             predictions = self.mcs_finance_parallel(number_of_simulations, prediction_window_size)
             # r before string converts normal string to raw string
-            path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Pharo\PythonFinanceParallel.txt"
+            path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP" \
+                   r"\Execution Results\Finance\PythonFinanceParallel.txt"
             out_file = open(path, "w")
             for i in range(len(predictions)):
                 for j in range(len(predictions[i])):

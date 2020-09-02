@@ -159,7 +159,7 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) exportFinanceFil
 	var serialNumber int64 = 1
 	if monteCarloSimulationFinance.parallelFlag == false {
 		var predictions [][]float64 = monteCarloSimulationFinance.mcsFinanceSerial(numberOfSimulations, predictionWindowSize)
-		f, err := os.Create("C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Pharo\\GolangFinanceSerial.txt") // creating...
+		f, err := os.Create("C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Execution Results\\Finance\\GolangFinanceSerial.txt") // creating...
 		if err != nil {
 			fmt.Printf("Error while creating a file: %v", err)
 			return
@@ -192,7 +192,7 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) exportFinanceFil
 	} else {
 		var predictions [][][]float64 = monteCarloSimulationFinance.mcsFinanceParallel(numberOfSimulations, predictionWindowSize)
 		// Creating file
-		f, err := os.Create("C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Pharo\\GolangFinanceParallel.txt")
+		f, err := os.Create("C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Execution Results\\Finance\\GolangFinanceParallel.txt")
 		if err != nil {
 			fmt.Printf("Error while creating a file: %v", err)
 			return
@@ -239,7 +239,7 @@ func main() {
 	monteCarloSimulationFinance.dataAcquisition()
 	monteCarloSimulationFinance.calculatePeriodicDailyReturn()
 
-	fmt.Println(monteCarloSimulationFinance.mcsFinanceParallel(10, 8))
+	fmt.Println(monteCarloSimulationFinance.mcsFinanceSerial(10, 8))
 	monteCarloSimulationFinance.exportFinanceFile(10, 8)
 
 }
