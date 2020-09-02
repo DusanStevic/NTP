@@ -86,9 +86,9 @@ func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiParallel(numberOfSimu
 func (monteCarloSimulationPi *MonteCarloSimulationPi) exportPiFile(simulations string) {
 	var path string
 	if monteCarloSimulationPi.parallelFlag == false {
-		path = "C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Pharo\\GolangPiSerial.txt"
+		path = "C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Execution Results\\Pi\\GolangPiSerial.txt"
 	} else {
-		path = "C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Pharo\\GolangPiParallel.txt"
+		path = "C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Execution Results\\Pi\\GolangPiParallel.txt"
 	}
 	f, err := os.Create(path) // creating...
 	if err != nil {
@@ -107,8 +107,8 @@ func (monteCarloSimulationPi *MonteCarloSimulationPi) exportPiFile(simulations s
 func main() {
 	monteCarloSimulationPi := MonteCarloSimulationPi{numberOfProcesses: 4}
 	start := time.Now()
-	//fmt.Println(monteCarloSimulationPi.mcsPiSerial(1000000000))
-	fmt.Println(monteCarloSimulationPi.mcsPiParallel(10000))
+	fmt.Println(monteCarloSimulationPi.mcsPiSerial(100000))
+	//fmt.Println(monteCarloSimulationPi.mcsPiParallel(100000))
 	duration := time.Since(start)
 	fmt.Println("duration:", duration)
 
