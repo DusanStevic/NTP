@@ -8,10 +8,8 @@ def calculate_execution_time(function):
         start_time = time.time()
         executing_function = function(*args, **kwargs)
         end_time = time.time()
-
         execution_time = round(end_time - start_time, 7)
         return executing_function, execution_time
-
     return calculate_duration
 
 
@@ -37,10 +35,12 @@ class MonteCarloSimulationPi:
         else:
             if self.parallel_flag == False:
                 # r before string converts normal string to raw string
-                path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Pharo\PythonPiSerial.txt"
+                path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP" \
+                       r"\Execution Results\Pi\PythonPiSerial.txt"
             else:
                 # r before string converts normal string to raw string
-                path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Pharo\PythonPiParallel.txt"
+                path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP" \
+                       r"\Execution Results\Pi\PythonPiParallel.txt"
             out_file = open(path, "w")
             inside = 0
             for _ in range(number_of_simulations):
@@ -60,8 +60,6 @@ class MonteCarloSimulationPi:
     def mcs_pi_serial(self, number_of_simulations):
         self.parallel_flag = False
         pi = 4 * self.simulation_pi(number_of_simulations) / number_of_simulations
-
-
         return pi
 
     @calculate_execution_time
@@ -76,24 +74,25 @@ class MonteCarloSimulationPi:
         simulations_per_process += self.number_of_processes * [number_of_simulations_per_process]
         inside_sum = pool.map(self.simulation_pi, simulations_per_process)
         pi = 4 * sum(inside_sum) / number_of_simulations
-
-        print("Pi(n=" + str(number_of_simulations) + ") = " + str(pi))
         return pi
 
 
 if __name__ == "__main__":
     number_of_simulations_n = 2500000
+    number_of_processes_p = 1
+    monte_carlo_simulation_pi = MonteCarloSimulationPi(number_of_processes_p)
+    monte_carlo_simulation_pi.experiment_flag = False
+    print("Approximation of Pi by using the Monte Carlo simulation serial version")
+    serial_pi, serial_execution_time = monte_carlo_simulation_pi.mcs_pi_serial(number_of_simulations_n)
+    print("Pi(n = {}, p = {}) = {}".format(number_of_simulations_n,number_of_processes_p,serial_pi))
+    print("Execution time (duration): {} seconds".format(serial_execution_time))
+
+    number_of_simulations_n = 2500000
     number_of_processes_p = 4
     monte_carlo_simulation_pi = MonteCarloSimulationPi(number_of_processes_p)
     monte_carlo_simulation_pi.experiment_flag = False
-    
-    print("Approximation of Pi by using the Monte Carlo simulation serial version")
-    pi, execution_time = monte_carlo_simulation_pi.mcs_pi_serial(number_of_simulations_n)
-    print("Pi(n = {}, p = {}) = {}".format(number_of_simulations_n,number_of_processes_p,pi))
-    print("Execution time (duration): {} seconds".format(execution_time))
-
     print("Approximation of Pi by using the Monte Carlo simulation parallel version")
-    pi, execution_time = monte_carlo_simulation_pi.mcs_pi_parallel(number_of_simulations_n)
-    print("Pi(n = {}, p = {}) = {}".format(number_of_simulations_n,number_of_processes_p,pi))
-    print("Execution time (duration): {} seconds".format(execution_time))
+    parallel_pi, parallel_execution_time = monte_carlo_simulation_pi.mcs_pi_parallel(number_of_simulations_n)
+    print("Pi(n = {}, p = {}) = {}".format(number_of_simulations_n,number_of_processes_p,parallel_pi))
+    print("Execution time (duration): {} seconds".format(parallel_execution_time))
 
