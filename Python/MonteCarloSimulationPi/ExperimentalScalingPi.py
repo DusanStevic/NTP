@@ -8,21 +8,30 @@ from MonteCarloSimulationPi import MonteCarloSimulationPi
 # s is part of the program which cannot be parallelized
 # s is ratio of the serial part
 SERIAL_PART_s = 0
-SERIAL_CODE_SHARE = 0
+
 
 
 # p is the proportion of execution time spent on the part that can be parallelized
 # p is part of the program which can be parallelized
 # p is ratio of the parallel part
 PARALLEL_PART_p = 1
-PARALLEL_CODE_SHARE = 1
+
 
 # Amdahl’s law and strong scaling
-def max_speedup_Amdahl(processes_num):
-    return 1.0 / (SERIAL_CODE_SHARE + PARALLEL_CODE_SHARE / processes_num)
+# Amdahl’s law can be formulated as follows speedup = 1 / (s + p / N) where
+# s = SERIAL_PART_s is the proportion of execution time spent on the serial part,
+# p = PARALLEL_PART_p is the proportion of execution time spent on the part that can be parallelized,
+# and N = number_of_processes is the number of processors.
+def calculate_amdahl_speedup(number_of_processes):
+    return 1.0 / (SERIAL_PART_s + PARALLEL_PART_p / number_of_processes)
+
 # Gustafson’s law and weak scaling
-def max_speedup_Gustafson(processes_num):
-    return SERIAL_CODE_SHARE + PARALLEL_CODE_SHARE * processes_num
+# Gustafson’s law can be formulated as follows speedup = s + p × N where
+# s = SERIAL_PART_s is the proportion of execution time spent on the serial part,
+# p = PARALLEL_PART_p is the proportion of execution time spent on the part that can be parallelized,
+# and N = number_of_processes is the number of processors.
+def calculate_gustafson_speedup(number_of_processes):
+    return SERIAL_PART_s + PARALLEL_PART_p * number_of_processes
 
 
 
@@ -48,7 +57,7 @@ def strong_scaling():
         print("Pi(n = {}, p = {}) = {}".format(number_of_simulations_n, number_of_processes_p, parallel_pi))
         print("Execution time (duration): {} seconds".format(parallel_execution_time))
         achieved_speedup = serial_execution_time / parallel_execution_time
-        max_speedup = max_speedup_Amdahl(number_of_processes_p)
+        max_speedup = calculate_amdahl_speedup(number_of_processes_p)
         print("Achieved speedup is: {} times.".format(achieved_speedup))
         print("Maximum speedup according to Amdahl’s law is: {} times.\n".format(max_speedup))
         out_file.write("{},{},{}\n".format(number_of_processes_p,achieved_speedup,max_speedup))
@@ -78,7 +87,7 @@ def weak_scaling():
         print("Pi(n = {}, p = {}) = {}".format(number_of_simulations_n, number_of_processes_p, parallel_pi))
         print("Execution time (duration): {} seconds".format(parallel_execution_time))
         achieved_speedup = serial_execution_time / parallel_execution_time
-        max_speedup = max_speedup_Gustafson(number_of_processes_p)
+        max_speedup = calculate_gustafson_speedup(number_of_processes_p)
         print("Achieved speedup is: {} times.".format(achieved_speedup))
         print("Maximum speedup according to Gustafson’s law is: {} times.\n".format(max_speedup))
         out_file.write("{},{},{}\n".format(number_of_processes_p, achieved_speedup, max_speedup))

@@ -9,6 +9,17 @@ from pandas_datareader import data
 from scipy.stats import norm
 
 
+def calculate_execution_time(function):
+    def calculate_duration(*args, **kwargs):
+        start_time = time.time()
+        executing_function = function(*args, **kwargs)
+        end_time = time.time()
+        execution_time = round(end_time - start_time, 7)
+        return executing_function, execution_time
+
+    return calculate_duration
+
+
 class MonteCarloSimulationFinance:
     def __init__(self, start_date, end_date, ticker_symbol, number_of_processes):
         self.start_date = start_date
@@ -133,16 +144,16 @@ class MonteCarloSimulationFinance:
                         else:
                             out_file.write("," + " ")
 
-
             out_file.close()
+
 
 if __name__ == "__main__":
     monte_carlo_simulation_finance = MonteCarloSimulationFinance('1980-01-01', '2019-12-31', 'AAPL', 5)
     monte_carlo_simulation_finance.data_acquisition()
     monte_carlo_simulation_finance.calculate_periodic_daily_return()
     start = time.time()
-    #print("Stock market price predictions using the Monte Carlo simulation serial version:" + str(
-    #monte_carlo_simulation_finance.mcs_finance_serial(10, 5)))
+    # print("Stock market price predictions using the Monte Carlo simulation serial version:" + str(
+    # monte_carlo_simulation_finance.mcs_finance_serial(10, 5)))
     print("Stock market price predictions using the Monte Carlo simulation parallel version:" + str(
         monte_carlo_simulation_finance.mcs_finance_parallel(10, 5)))
     end = time.time()
@@ -150,4 +161,3 @@ if __name__ == "__main__":
     print(f"Duration {duration} seconds")
 
     monte_carlo_simulation_finance.export_finance_file(10, 8)
-

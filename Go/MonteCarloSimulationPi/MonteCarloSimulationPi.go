@@ -133,7 +133,7 @@ func calculateExecutionTime() func() float64 {
 
 func main() {
 	monteCarloSimulationPi := MonteCarloSimulationPi{numberOfProcesses: 4}
-	monteCarloSimulationPi.experimentFlag = false
+	monteCarloSimulationPi.experimentFlag = true
 	//start := time.Now()
 	fmt.Println(monteCarloSimulationPi.mcsPiSerial(100000))
 	//fmt.Println(monteCarloSimulationPi.mcsPiParallel(100000))
