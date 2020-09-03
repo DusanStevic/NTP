@@ -40,8 +40,8 @@ def strong_scaling():
     path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP" \
            r"\Scaling Results\Pi\PythonPiStrongScaling.csv"
     out_file = open(path, "w")
-    out_file.write("parallel_tasks_num,achieved_speedup,max_theoretical_speedup\n")
-    number_of_simulations_n = 500000
+    out_file.write("number_of_processes,achieved_speedup,theoretical_maximum_speedup\n")
+    number_of_simulations_n = 5000000
     number_of_processes_p = 1
     monte_carlo_simulation_pi = MonteCarloSimulationPi(number_of_processes_p)
     monte_carlo_simulation_pi.experiment_flag = True
@@ -57,10 +57,10 @@ def strong_scaling():
         print("Pi(n = {}, p = {}) = {}".format(number_of_simulations_n, number_of_processes_p, parallel_pi))
         print("Execution time (duration): {} seconds".format(parallel_execution_time))
         achieved_speedup = serial_execution_time / parallel_execution_time
-        max_speedup = calculate_amdahl_speedup(number_of_processes_p)
+        theoretical_maximum_speedup = calculate_amdahl_speedup(number_of_processes_p)
         print("Achieved speedup is: {} times.".format(achieved_speedup))
-        print("Maximum speedup according to Amdahl’s law is: {} times.\n".format(max_speedup))
-        out_file.write("{},{},{}\n".format(number_of_processes_p,achieved_speedup,max_speedup))
+        print("Theoretical maximum speedup according to Amdahl’s law is: {} times.\n".format(theoretical_maximum_speedup))
+        out_file.write("{},{},{}\n".format(number_of_processes_p,achieved_speedup,theoretical_maximum_speedup))
     out_file.close()
 
 
@@ -70,35 +70,35 @@ def weak_scaling():
     path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP" \
            r"\Scaling Results\Pi\PythonPiWeakScaling.csv"
     out_file = open(path, "w")
-    out_file.write("parallel_tasks_num,achieved_speedup,max_theoretical_speedup\n")
+    out_file.write("number_of_processes,achieved_speedup,theoretical_maximum_speedup\n")
 
-    number_of_simulations_n = 500000
+    number_of_simulations_n = 5000000
 
     for number_of_processes_p in range(2, 14):
         increased_number_of_simulations = number_of_simulations_n * number_of_processes_p
         monte_carlo_simulation_pi = MonteCarloSimulationPi(number_of_processes_p)
         monte_carlo_simulation_pi.experiment_flag = True
         print("Approximation of Pi by using the Monte Carlo simulation serial version")
-        serial_pi, serial_execution_time = monte_carlo_simulation_pi.mcs_pi_serial(number_of_simulations_n)
-        print("Pi(n = {}, p = {}) = {}".format(number_of_simulations_n,1, serial_pi))
+        serial_pi, serial_execution_time = monte_carlo_simulation_pi.mcs_pi_serial(increased_number_of_simulations)
+        print("Pi(n = {}, p = {}) = {}".format(increased_number_of_simulations,1, serial_pi))
         print("Execution time (duration): {} seconds".format(serial_execution_time))
         print("Approximation of Pi by using the Monte Carlo simulation parallel version")
-        parallel_pi, parallel_execution_time = monte_carlo_simulation_pi.mcs_pi_parallel(number_of_simulations_n)
-        print("Pi(n = {}, p = {}) = {}".format(number_of_simulations_n, number_of_processes_p, parallel_pi))
+        parallel_pi, parallel_execution_time = monte_carlo_simulation_pi.mcs_pi_parallel(increased_number_of_simulations)
+        print("Pi(n = {}, p = {}) = {}".format(increased_number_of_simulations, number_of_processes_p, parallel_pi))
         print("Execution time (duration): {} seconds".format(parallel_execution_time))
         achieved_speedup = serial_execution_time / parallel_execution_time
-        max_speedup = calculate_gustafson_speedup(number_of_processes_p)
+        theoretical_maximum_speedup = calculate_gustafson_speedup(number_of_processes_p)
         print("Achieved speedup is: {} times.".format(achieved_speedup))
-        print("Maximum speedup according to Gustafson’s law is: {} times.\n".format(max_speedup))
-        out_file.write("{},{},{}\n".format(number_of_processes_p, achieved_speedup, max_speedup))
+        print("Theoretical maximum speedup according to Gustafson’s law is: {} times.\n".format(theoretical_maximum_speedup))
+        out_file.write("{},{},{}\n".format(number_of_processes_p, achieved_speedup, theoretical_maximum_speedup))
     out_file.close()
 
 
 
 if __name__ == '__main__':
     print("Start strong scaling:")
-    strong_scaling()
+    #strong_scaling()
     print("End strong scaling:")
     print("Start weak scaling:")
-    weak_scaling()
+    #weak_scaling()
     print("End weak scaling:")
