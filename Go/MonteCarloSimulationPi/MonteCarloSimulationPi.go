@@ -82,7 +82,9 @@ func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiSerial(numberOfSimula
 	return pi, executionTime
 }
 
-func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiParallel(numberOfSimulations int) float64 {
+func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiParallel(numberOfSimulations int) (float64, func() float64) {
+	executionTime := calculateExecutionTime()
+	defer executionTime()
 	monteCarloSimulationPi.parallelFlag = true
 	numberOfSimulationsPerProcess := numberOfSimulations / monteCarloSimulationPi.numberOfProcesses
 	/* 	Buffered channels are useful when you know how many goroutines you have launched,
@@ -98,8 +100,9 @@ func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiParallel(numberOfSimu
 	for i := 0; i < monteCarloSimulationPi.numberOfProcesses; i++ {
 		inside += <-channel
 	}
+	pi := 4 * float64(inside) / float64(numberOfSimulations)
+	return pi, executionTime
 
-	return 4 * float64(inside) / float64(numberOfSimulations)
 }
 
 func (monteCarloSimulationPi *MonteCarloSimulationPi) exportPiFile(simulations string) {
@@ -132,15 +135,22 @@ func calculateExecutionTime() func() float64 {
 }
 
 func main() {
-	monteCarloSimulationPi := MonteCarloSimulationPi{numberOfProcesses: 4}
+	numberOfSimulations := 1000000000
+	numberOfProcesses := 1
+	monteCarloSimulationPi := MonteCarloSimulationPi{numberOfProcesses: numberOfProcesses}
 	monteCarloSimulationPi.experimentFlag = true
-	//start := time.Now()
-	fmt.Println(monteCarloSimulationPi.mcsPiSerial(100000))
-	//fmt.Println(monteCarloSimulationPi.mcsPiParallel(100000))
-	//duration := time.Since(start)
-	//fmt.Println("duration:", duration)
-	serialPi, serialExecutionTime := monteCarloSimulationPi.mcsPiSerial(100000)
-	fmt.Println("pi:", serialPi)
-	fmt.Println("duration:", serialExecutionTime())
+	fmt.Println("Approximation of Pi by using the Monte Carlo simulation serial version")
+	serialPi, serialExecutionTime := monteCarloSimulationPi.mcsPiSerial(numberOfSimulations)
+	fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulations, numberOfProcesses, serialPi)
+	fmt.Printf("Execution time (duration): %f seconds\r\n", serialExecutionTime())
+
+	numberOfSimulations = 1000000000
+	numberOfProcesses = 4
+	monteCarloSimulationPi = MonteCarloSimulationPi{numberOfProcesses: numberOfProcesses}
+	monteCarloSimulationPi.experimentFlag = true
+	fmt.Println("Approximation of Pi by using the Monte Carlo simulation parallel version")
+	parallelPi, parallelExecutionTime := monteCarloSimulationPi.mcsPiParallel(numberOfSimulations)
+	fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulations, numberOfProcesses, parallelPi)
+	fmt.Printf("Execution time (duration): %f seconds", parallelExecutionTime())
 
 }
