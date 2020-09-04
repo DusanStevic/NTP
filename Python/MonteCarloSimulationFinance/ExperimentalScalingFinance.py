@@ -44,22 +44,21 @@ def strong_scaling():
     out_file = open(path, "w")
     out_file.write("number_of_processes,achieved_speedup,theoretical_maximum_speedup\n")
 
-
-
     number_of_simulations_n = 10000
     prediction_window_size_w = 7
     number_of_processes_serial = 1
-    monte_carlo_simulation_finance = MonteCarloSimulationFinance('1980-01-01', '2019-12-31', 'AAPL', number_of_processes_serial)
+    monte_carlo_simulation_finance = MonteCarloSimulationFinance('1980-01-01', '2019-12-31', 'AAPL',
+                                                                 number_of_processes_serial)
     monte_carlo_simulation_finance.data_acquisition()
     monte_carlo_simulation_finance.calculate_periodic_daily_return()
-    serial_predictions, serial_execution_time = monte_carlo_simulation_finance.mcs_finance_serial(number_of_simulations_n,
-                                                                                                  prediction_window_size_w)
+    serial_predictions, serial_execution_time = monte_carlo_simulation_finance.mcs_finance_serial(
+        number_of_simulations_n,
+        prediction_window_size_w)
     print("Stock market price predictions using the Monte Carlo simulation serial version")
     print("Execution time(n = {}, p = {}, w = {}) = {} seconds".format(number_of_simulations_n,
                                                                        number_of_processes_serial,
                                                                        prediction_window_size_w, serial_execution_time))
     for number_of_processes_parallel in range(2, 14):
-
         monte_carlo_simulation_finance = MonteCarloSimulationFinance('1980-01-01', '2019-12-31', 'AAPL',
                                                                      number_of_processes_parallel)
         monte_carlo_simulation_finance.data_acquisition()
@@ -73,10 +72,6 @@ def strong_scaling():
                                                                            prediction_window_size_w,
                                                                            parallel_execution_time))
 
-
-
-
-
         achieved_speedup = serial_execution_time / parallel_execution_time
         theoretical_maximum_speedup = calculate_amdahl_speedup(number_of_processes_parallel)
         print("Achieved speedup is: {} times.".format(achieved_speedup))
@@ -87,39 +82,53 @@ def strong_scaling():
     print("End strong scaling.")
 
 
-# def weak_scaling():
-#     print("=======================")
-#     print("Start weak scaling:")
-#     print("=======================\n")
-#     # r before string converts normal string to raw string
-#     path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP" \
-#            r"\Scaling Results\Finance\PythonFinanceWeakScaling.csv"
-#     out_file = open(path, "w")
-#     out_file.write("number_of_processes,achieved_speedup,theoretical_maximum_speedup\n")
-#     number_of_simulations_n = 5000000
-#     for number_of_processes_p in range(2, 14):
-#         increased_number_of_simulations = number_of_simulations_n * number_of_processes_p
-#         monte_carlo_simulation_pi = MonteCarloSimulationPi(number_of_processes_p)
-#         monte_carlo_simulation_pi.experiment_flag = True
-#         print("Approximation of Pi by using the Monte Carlo simulation serial version")
-#         serial_pi, serial_execution_time = monte_carlo_simulation_pi.mcs_pi_serial(increased_number_of_simulations)
-#         print("Pi(n = {}, p = {}) = {}".format(increased_number_of_simulations, 1, serial_pi))
-#         print("Execution time (duration): {} seconds".format(serial_execution_time))
-#         print("Approximation of Pi by using the Monte Carlo simulation parallel version")
-#         parallel_pi, parallel_execution_time = monte_carlo_simulation_pi.mcs_pi_parallel(
-#             increased_number_of_simulations)
-#         print("Pi(n = {}, p = {}) = {}".format(increased_number_of_simulations, number_of_processes_p, parallel_pi))
-#         print("Execution time (duration): {} seconds".format(parallel_execution_time))
-#         achieved_speedup = serial_execution_time / parallel_execution_time
-#         theoretical_maximum_speedup = calculate_gustafson_speedup(number_of_processes_p)
-#         print("Achieved speedup is: {} times.".format(achieved_speedup))
-#         print("Theoretical maximum speedup according to Gustafson’s law is: {} times.\n".format(
-#             theoretical_maximum_speedup))
-#         out_file.write("{},{},{}\n".format(number_of_processes_p, achieved_speedup, theoretical_maximum_speedup))
-#     out_file.close()
-#     print("End weak scaling.")
+def weak_scaling():
+    print("=======================")
+    print("Start weak scaling:")
+    print("=======================\n")
+    # r before string converts normal string to raw string
+    path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP" \
+           r"\Scaling Results\Finance\PythonFinanceWeakScaling.csv"
+    out_file = open(path, "w")
+    out_file.write("number_of_processes,achieved_speedup,theoretical_maximum_speedup\n")
+    number_of_simulations_n = 500
+    prediction_window_size_w = 7
+
+    for number_of_processes_p in range(2, 14):
+        increased_number_of_simulations = number_of_simulations_n * number_of_processes_p
+
+        monte_carlo_simulation_finance = MonteCarloSimulationFinance('1980-01-01', '2019-12-31', 'AAPL',
+                                                                     number_of_processes_p)
+        monte_carlo_simulation_finance.data_acquisition()
+        monte_carlo_simulation_finance.calculate_periodic_daily_return()
+        serial_predictions, serial_execution_time = monte_carlo_simulation_finance.mcs_finance_serial(
+            increased_number_of_simulations,
+            prediction_window_size_w)
+        print("Stock market price predictions using the Monte Carlo simulation serial version")
+        print("Execution time(n = {}, p = {}, w = {}) = {} seconds".format(increased_number_of_simulations,
+                                                                           1,
+                                                                           prediction_window_size_w,
+                                                                           serial_execution_time))
+
+        parallel_predictions, parallel_execution_time = monte_carlo_simulation_finance.mcs_finance_parallel(
+            increased_number_of_simulations,
+            prediction_window_size_w)
+        print("Stock market price predictions using the Monte Carlo simulation parallel version")
+        print("Execution time(n = {}, p = {}, w = {}) = {} seconds".format(increased_number_of_simulations,
+                                                                           number_of_processes_p,
+                                                                           prediction_window_size_w,
+                                                                           parallel_execution_time))
+
+        achieved_speedup = serial_execution_time / parallel_execution_time
+        theoretical_maximum_speedup = calculate_gustafson_speedup(number_of_processes_p)
+        print("Achieved speedup is: {} times.".format(achieved_speedup))
+        print("Theoretical maximum speedup according to Gustafson’s law is: {} times.\n".format(
+            theoretical_maximum_speedup))
+        out_file.write("{},{},{}\n".format(number_of_processes_p, achieved_speedup, theoretical_maximum_speedup))
+    out_file.close()
+    print("End weak scaling.")
 
 
 if __name__ == '__main__':
     strong_scaling()
-    #weak_scaling()
+    weak_scaling()

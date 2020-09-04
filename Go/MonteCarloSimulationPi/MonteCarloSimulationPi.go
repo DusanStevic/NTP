@@ -205,7 +205,7 @@ func weakScaling() {
 		monteCarloSimulationPi.experimentFlag = true
 		fmt.Println("Approximation of Pi by using the Monte Carlo simulation serial version")
 		serialPi, serialExecutionTime := monteCarloSimulationPi.mcsPiSerial(increasedNumberOfSimulations)
-		fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", increasedNumberOfSimulations, numberOfProcesses, serialPi)
+		fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", increasedNumberOfSimulations, 1, serialPi)
 		fmt.Printf("Execution time (duration): %f seconds\r\n", serialExecutionTime)
 		fmt.Println("Approximation of Pi by using the Monte Carlo simulation parallel version")
 		parallelPi, parallelExecutionTime := monteCarloSimulationPi.mcsPiParallel(increasedNumberOfSimulations)

@@ -230,6 +230,17 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) exportFinanceFil
 
 }
 
+var serialPart float64 = 0.0
+var parallelPart float64 = 1.0
+
+func calculateAmdahlSpeedup(numberOfProcesses int) float64 {
+	return 1.0 / (serialPart + parallelPart/float64(numberOfProcesses))
+}
+
+func calculateGustafsonSpeedup(numberOfProcesses int) float64 {
+	return serialPart + parallelPart*float64(numberOfProcesses)
+}
+
 func main() {
 	monteCarloSimulationFinance := MonteCarloSimulationFinance{
 		tickerSymbol:      "AAPL",
