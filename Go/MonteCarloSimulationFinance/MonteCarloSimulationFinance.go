@@ -22,7 +22,6 @@ type MonteCarloSimulationFinance struct {
 	endDate           string
 	tickerSymbol      string
 	data              []float64
-	parallelFlag      bool
 }
 
 // https://github.com/markcheno/go-quote
@@ -124,16 +123,17 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) simulationFinanc
 
 }
 
-func (monteCarloSimulationFinance *MonteCarloSimulationFinance) mcsFinanceSerial(numberOfSimulations int, predictionWindowSize int) [][]float64 {
-	monteCarloSimulationFinance.parallelFlag = false
+func (monteCarloSimulationFinance *MonteCarloSimulationFinance) mcsFinanceSerial(numberOfSimulations int, predictionWindowSize int) ([][]float64, float64) {
+	startTime := time.Now()
 	channel := make(chan [][]float64)
 	go monteCarloSimulationFinance.simulationFinance(numberOfSimulations, predictionWindowSize, channel)
 	predictions := <-channel
-	return predictions
+	executionTime := time.Since(startTime).Seconds()
+	return predictions, executionTime
 }
 
-func (monteCarloSimulationFinance *MonteCarloSimulationFinance) mcsFinanceParallel(numberOfSimulations int, predictionWindowSize int) [][][]float64 {
-	monteCarloSimulationFinance.parallelFlag = true
+func (monteCarloSimulationFinance *MonteCarloSimulationFinance) mcsFinanceParallel(numberOfSimulations int, predictionWindowSize int) ([][][]float64, float64) {
+	startTime := time.Now()
 	numberOfSimulationsPerProcess := numberOfSimulations / monteCarloSimulationFinance.numberOfProcesses
 	/* 	Buffered channels are useful when you know how many goroutines you have launched,
 	   	want to limit the number of goroutines you will launch, or want to limit
@@ -149,83 +149,86 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) mcsFinanceParall
 		predictions = append(predictions, prediction)
 
 	}
-
-	return predictions
+	executionTime := time.Since(startTime).Seconds()
+	return predictions, executionTime
 }
 
-func (monteCarloSimulationFinance *MonteCarloSimulationFinance) exportFinanceFile(numberOfSimulations int, predictionWindowSize int) {
+func (monteCarloSimulationFinance *MonteCarloSimulationFinance) exportFinanceFileSerial(serialPredictions [][]float64) {
 	//One row in the output file.
 	var row strings.Builder
 	var serialNumber int64 = 1
-	if monteCarloSimulationFinance.parallelFlag == false {
-		var predictions [][]float64 = monteCarloSimulationFinance.mcsFinanceSerial(numberOfSimulations, predictionWindowSize)
-		f, err := os.Create("C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Execution Results\\Finance\\GolangFinanceSerial.txt") // creating...
-		if err != nil {
-			fmt.Printf("Error while creating a file: %v", err)
-			return
+	var predictions [][]float64 = serialPredictions
+	f, err := os.Create("C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Execution Results\\Finance\\GolangFinanceSerial.txt") // creating...
+	if err != nil {
+		fmt.Printf("Error while creating a file: %v", err)
+		return
+	}
+	defer f.Close()
+	for i := 0; i < len(predictions); i++ {
+		for j := 0; j < len(predictions[i]); j++ {
+			if j == 0 {
+				// Write a serial number of simulations at the beginning of a file.
+				var serialNumberOfSimulation string = strconv.FormatInt(serialNumber, 10)
+				row.WriteString(serialNumberOfSimulation + "," + " ")
+			}
+
+			//A component in one row of the output file.
+			var component string = strconv.FormatFloat(predictions[i][j], 'f', 7, 64)
+			row.WriteString(component)
+			if j == (len(predictions[i]) - 1) {
+				row.WriteString("\r\n")
+				serialNumber++
+			} else {
+				row.WriteString("," + " ")
+			}
 		}
-		defer f.Close()
-		for i := 0; i < len(predictions); i++ {
-			for j := 0; j < len(predictions[i]); j++ {
-				if j == 0 {
+	}
+	// Writing to file
+	_, err = f.WriteString(row.String())
+	if err != nil {
+		fmt.Printf("Error while writing a file: %v", err)
+	}
+
+}
+
+func (monteCarloSimulationFinance *MonteCarloSimulationFinance) exportFinanceFileParallel(parallelPredictions [][][]float64) {
+	//One row in the output file.
+	var row strings.Builder
+	var serialNumber int64 = 1
+	var predictions [][][]float64 = parallelPredictions
+	// Creating file
+	f, err := os.Create("C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Execution Results\\Finance\\GolangFinanceParallel.txt")
+	if err != nil {
+		fmt.Printf("Error while creating a file: %v", err)
+		return
+	}
+	defer f.Close()
+	for i := 0; i < len(predictions); i++ {
+		for j := 0; j < len(predictions[i]); j++ {
+			for k := 0; k < len(predictions[i][j]); k++ {
+				if k == 0 {
 					// Write a serial number of simulations at the beginning of a file.
 					var serialNumberOfSimulation string = strconv.FormatInt(serialNumber, 10)
 					row.WriteString(serialNumberOfSimulation + "," + " ")
 				}
 
 				//A component in one row of the output file.
-				var component string = strconv.FormatFloat(predictions[i][j], 'f', 7, 64)
+				var component string = strconv.FormatFloat(predictions[i][j][k], 'f', 7, 64)
 				row.WriteString(component)
-				if j == (len(predictions[i]) - 1) {
+				if k == (len(predictions[i][j]) - 1) {
 					row.WriteString("\r\n")
 					serialNumber++
 				} else {
 					row.WriteString("," + " ")
 				}
+
 			}
 		}
-		// Writing to file
-		_, err = f.WriteString(row.String())
-		if err != nil {
-			fmt.Printf("Error while writing a file: %v", err)
-		}
-	} else {
-		var predictions [][][]float64 = monteCarloSimulationFinance.mcsFinanceParallel(numberOfSimulations, predictionWindowSize)
-		// Creating file
-		f, err := os.Create("C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Execution Results\\Finance\\GolangFinanceParallel.txt")
-		if err != nil {
-			fmt.Printf("Error while creating a file: %v", err)
-			return
-		}
-		defer f.Close()
-		for i := 0; i < len(predictions); i++ {
-			for j := 0; j < len(predictions[i]); j++ {
-				for k := 0; k < len(predictions[i][j]); k++ {
-					if k == 0 {
-						// Write a serial number of simulations at the beginning of a file.
-						var serialNumberOfSimulation string = strconv.FormatInt(serialNumber, 10)
-						row.WriteString(serialNumberOfSimulation + "," + " ")
-					}
-
-					//A component in one row of the output file.
-					var component string = strconv.FormatFloat(predictions[i][j][k], 'f', 7, 64)
-					row.WriteString(component)
-					if k == (len(predictions[i][j]) - 1) {
-						row.WriteString("\r\n")
-						serialNumber++
-					} else {
-						row.WriteString("," + " ")
-					}
-
-				}
-			}
-		}
-		// Writing to file
-		_, err = f.WriteString(row.String())
-		if err != nil {
-			fmt.Printf("Error while writing a file: %v", err)
-		}
-
+	}
+	// Writing to file
+	_, err = f.WriteString(row.String())
+	if err != nil {
+		fmt.Printf("Error while writing a file: %v", err)
 	}
 
 }
@@ -242,15 +245,42 @@ func calculateGustafsonSpeedup(numberOfProcesses int) float64 {
 }
 
 func main() {
-	monteCarloSimulationFinance := MonteCarloSimulationFinance{
+	numberOfSimulationsSerial := 10
+	predictionWindowSizeSerial := 7
+	numberOfProcessesSerial := 1
+	monteCarloSimulationFinanceSerial := MonteCarloSimulationFinance{
 		tickerSymbol:      "AAPL",
 		startDate:         "2000-01-01",
 		endDate:           "2020-01-01",
-		numberOfProcesses: 5}
-	monteCarloSimulationFinance.dataAcquisition()
-	monteCarloSimulationFinance.calculatePeriodicDailyReturn()
+		numberOfProcesses: numberOfProcessesSerial}
+	monteCarloSimulationFinanceSerial.dataAcquisition()
+	monteCarloSimulationFinanceSerial.calculatePeriodicDailyReturn()
+	fmt.Println("Stock market price predictions using the Monte Carlo simulation serial version")
+	serialPredictions, serialExecutionTime := monteCarloSimulationFinanceSerial.mcsFinanceSerial(numberOfSimulationsSerial, predictionWindowSizeSerial)
 
-	fmt.Println(monteCarloSimulationFinance.mcsFinanceSerial(10, 8))
-	monteCarloSimulationFinance.exportFinanceFile(10, 8)
+	fmt.Printf("Execution time(n = %d, p = %d, w = %d) = %f seconds\r\n",
+		numberOfSimulationsSerial, numberOfProcessesSerial,
+		predictionWindowSizeSerial, serialExecutionTime)
+
+	monteCarloSimulationFinanceSerial.exportFinanceFileSerial(serialPredictions)
+
+	numberOfSimulationsParallel := 10
+	predictionWindowSizeParallel := 7
+	numberOfProcessesParallel := 4
+	monteCarloSimulationFinanceParallel := MonteCarloSimulationFinance{
+		tickerSymbol:      "AAPL",
+		startDate:         "2000-01-01",
+		endDate:           "2020-01-01",
+		numberOfProcesses: numberOfProcessesParallel}
+	monteCarloSimulationFinanceParallel.dataAcquisition()
+	monteCarloSimulationFinanceParallel.calculatePeriodicDailyReturn()
+	fmt.Println("Stock market price predictions using the Monte Carlo simulation parallel version")
+	parallelPredictions, parallelExecutionTime := monteCarloSimulationFinanceParallel.mcsFinanceParallel(numberOfSimulationsParallel, predictionWindowSizeParallel)
+
+	fmt.Printf("Execution time(n = %d, p = %d, w = %d) = %f seconds\r\n",
+		numberOfSimulationsParallel, numberOfProcessesParallel,
+		predictionWindowSizeParallel, parallelExecutionTime)
+
+	monteCarloSimulationFinanceParallel.exportFinanceFileParallel(parallelPredictions)
 
 }
