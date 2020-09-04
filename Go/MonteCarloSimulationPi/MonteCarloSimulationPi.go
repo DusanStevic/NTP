@@ -71,20 +71,19 @@ func (monteCarloSimulationPi *MonteCarloSimulationPi) simulationPi(numberOfSimul
 
 }
 
-func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiSerial(numberOfSimulations int) (float64, func() float64) {
-	executionTime := calculateExecutionTime()
-	defer executionTime()
+func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiSerial(numberOfSimulations int) (float64, float64) {
+	startTime := time.Now()
 	monteCarloSimulationPi.parallelFlag = false
 	channel := make(chan int)
 	go monteCarloSimulationPi.simulationPi(numberOfSimulations, channel)
 	inside := <-channel
 	pi := 4 * float64(inside) / float64(numberOfSimulations)
+	executionTime := time.Since(startTime).Seconds()
 	return pi, executionTime
 }
 
-func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiParallel(numberOfSimulations int) (float64, func() float64) {
-	executionTime := calculateExecutionTime()
-	defer executionTime()
+func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiParallel(numberOfSimulations int) (float64, float64) {
+	startTime := time.Now()
 	monteCarloSimulationPi.parallelFlag = true
 	numberOfSimulationsPerProcess := numberOfSimulations / monteCarloSimulationPi.numberOfProcesses
 	/* 	Buffered channels are useful when you know how many goroutines you have launched,
@@ -101,6 +100,7 @@ func (monteCarloSimulationPi *MonteCarloSimulationPi) mcsPiParallel(numberOfSimu
 		inside += <-channel
 	}
 	pi := 4 * float64(inside) / float64(numberOfSimulations)
+	executionTime := time.Since(startTime).Seconds()
 	return pi, executionTime
 
 }
@@ -126,31 +126,99 @@ func (monteCarloSimulationPi *MonteCarloSimulationPi) exportPiFile(simulations s
 
 }
 
-func calculateExecutionTime() func() float64 {
-	startTime := time.Now()
-	//These kind of functions are called anonymous functions since they do not have a name.
-	return func() float64 {
-		return time.Since(startTime).Seconds()
+func exportScalingFile(scaling string, strongFlag bool) {
+	var path string
+	if strongFlag == true {
+		path = "C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Scaling Results\\Pi\\GolangPiStrongScaling.csv"
+	} else {
+		path = "C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Scaling Results\\Pi\\GolangPiWeakScaling.csv"
 	}
+	f, err := os.Create(path) // creating...
+	if err != nil {
+		fmt.Printf("Error while creating a file: %v", err)
+		return
+	}
+	defer f.Close()
+	// Writing to file
+	_, err = f.WriteString(scaling)
+	if err != nil {
+		fmt.Printf("Error while writing a file: %v", err)
+	}
+
+}
+
+var serialPart float64 = 0.0
+var parallelPart float64 = 1.0
+
+func calculateAmdahlSpeedup(numberOfProcesses int) float64 {
+	return 1.0 / (serialPart + parallelPart/float64(numberOfProcesses))
+}
+
+func calculateGustafsonSpeedup(numberOfProcesses int) float64 {
+	return serialPart + parallelPart*float64(numberOfProcesses)
+}
+
+func strongScaling() {
+	fmt.Println("=======================")
+	fmt.Println("Start strong scaling:")
+	fmt.Println("=======================")
+	//One row in the output file.
+	var row strings.Builder
+	row.WriteString("number_of_processes,achieved_speedup,theoretical_maximum_speedup\r\n")
+	numberOfSimulations := 100000000
+	numberOfProcessesSerial := 1
+	monteCarloSimulationPiSerial := MonteCarloSimulationPi{numberOfProcesses: numberOfProcessesSerial}
+	monteCarloSimulationPiSerial.experimentFlag = true
+	fmt.Println("Approximation of Pi by using the Monte Carlo simulation serial version")
+	serialPi, serialExecutionTime := monteCarloSimulationPiSerial.mcsPiSerial(numberOfSimulations)
+	fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulations, numberOfProcessesSerial, serialPi)
+	fmt.Printf("Execution time (duration): %f seconds\r\n", serialExecutionTime)
+	for numberOfProcessesParallel := 2; numberOfProcessesParallel < 14; numberOfProcessesParallel++ {
+		monteCarloSimulationPiParallel := MonteCarloSimulationPi{numberOfProcesses: numberOfProcessesParallel}
+		monteCarloSimulationPiParallel.experimentFlag = true
+		fmt.Println("Approximation of Pi by using the Monte Carlo simulation parallel version")
+		parallelPi, parallelExecutionTime := monteCarloSimulationPiParallel.mcsPiParallel(numberOfSimulations)
+		fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulations, numberOfProcessesParallel, parallelPi)
+		fmt.Printf("Execution time (duration): %f seconds.\r\n", parallelExecutionTime)
+		achievedSpeedup := serialExecutionTime / parallelExecutionTime
+		theoreticalMaximumSpeedup := calculateAmdahlSpeedup(numberOfProcessesParallel)
+		fmt.Printf("Achieved speedup is: %f times.\r\n", achievedSpeedup)
+		fmt.Printf("Theoretical maximum speedup according to Amdahl’s law is: %f times.\r\n", theoreticalMaximumSpeedup)
+		row.WriteString(strconv.FormatInt(int64(numberOfProcessesParallel), 10) + "," + strconv.FormatFloat(achievedSpeedup, 'f', -1, 64) + "," + strconv.FormatInt(int64(theoreticalMaximumSpeedup), 10) + "\r\n")
+	}
+	exportScalingFile(row.String(), true)
+	fmt.Println("End strong scaling.")
+
+}
+
+func weakScalingExperiment() {
+	fmt.Println("=======================")
+	fmt.Println("Start weak scaling:")
+	fmt.Println("=======================")
+
+	fmt.Println("End weak scaling.")
+
 }
 
 func main() {
-	numberOfSimulations := 1000000000
-	numberOfProcesses := 1
-	monteCarloSimulationPi := MonteCarloSimulationPi{numberOfProcesses: numberOfProcesses}
-	monteCarloSimulationPi.experimentFlag = true
-	fmt.Println("Approximation of Pi by using the Monte Carlo simulation serial version")
-	serialPi, serialExecutionTime := monteCarloSimulationPi.mcsPiSerial(numberOfSimulations)
-	fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulations, numberOfProcesses, serialPi)
-	fmt.Printf("Execution time (duration): %f seconds\r\n", serialExecutionTime())
+	/* 	numberOfSimulations := 1000000000
+	   	numberOfProcesses := 1
+	   	monteCarloSimulationPi := MonteCarloSimulationPi{numberOfProcesses: numberOfProcesses}
+	   	monteCarloSimulationPi.experimentFlag = true
+	   	fmt.Println("Approximation of Pi by using the Monte Carlo simulation serial version")
+	   	serialPi, serialExecutionTime := monteCarloSimulationPi.mcsPiSerial(numberOfSimulations)
+	   	fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulations, numberOfProcesses, serialPi)
+	   	fmt.Printf("Execution time (duration): %f seconds\r\n", serialExecutionTime()) */
 
-	numberOfSimulations = 1000000000
-	numberOfProcesses = 4
-	monteCarloSimulationPi = MonteCarloSimulationPi{numberOfProcesses: numberOfProcesses}
-	monteCarloSimulationPi.experimentFlag = true
-	fmt.Println("Approximation of Pi by using the Monte Carlo simulation parallel version")
-	parallelPi, parallelExecutionTime := monteCarloSimulationPi.mcsPiParallel(numberOfSimulations)
-	fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulations, numberOfProcesses, parallelPi)
-	fmt.Printf("Execution time (duration): %f seconds", parallelExecutionTime())
+	/* 	numberOfSimulations = 1000000000
+	   	numberOfProcesses = 4
+	   	monteCarloSimulationPi = MonteCarloSimulationPi{numberOfProcesses: numberOfProcesses}
+	   	monteCarloSimulationPi.experimentFlag = true
+	   	fmt.Println("Approximation of Pi by using the Monte Carlo simulation parallel version")
+	   	parallelPi, parallelExecutionTime := monteCarloSimulationPi.mcsPiParallel(numberOfSimulations)
+	   	fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulations, numberOfProcesses, parallelPi)
+	   	fmt.Printf("Execution time (duration): %f seconds", parallelExecutionTime()) */
+
+	strongScaling()
 
 }
