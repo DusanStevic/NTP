@@ -233,6 +233,27 @@ func (monteCarloSimulationFinance *MonteCarloSimulationFinance) exportFinanceFil
 
 }
 
+func exportScalingFile(scaling string, strongFlag bool) {
+	var path string
+	if strongFlag == true {
+		path = "C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Scaling Results\\Finance\\GolangPiStrongScaling.csv"
+	} else {
+		path = "C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Scaling Results\\Finance\\GolangPiWeakScaling.csv"
+	}
+	f, err := os.Create(path) // creating...
+	if err != nil {
+		fmt.Printf("Error while creating a file: %v", err)
+		return
+	}
+	defer f.Close()
+	// Writing to file
+	_, err = f.WriteString(scaling)
+	if err != nil {
+		fmt.Printf("Error while writing a file: %v", err)
+	}
+
+}
+
 var serialPart float64 = 0.0
 var parallelPart float64 = 1.0
 
@@ -244,9 +265,15 @@ func calculateGustafsonSpeedup(numberOfProcesses int) float64 {
 	return serialPart + parallelPart*float64(numberOfProcesses)
 }
 
-func main() {
-	numberOfSimulationsSerial := 10
-	predictionWindowSizeSerial := 7
+func strongScaling() {
+	fmt.Println("=======================")
+	fmt.Println("Start strong scaling:")
+	fmt.Println("=======================")
+	//One row in the output file.
+	var row strings.Builder
+	row.WriteString("number_of_processes,achieved_speedup,theoretical_maximum_speedup\r\n")
+	numberOfSimulations := 1000000
+	predictionWindowSize := 7
 	numberOfProcessesSerial := 1
 	monteCarloSimulationFinanceSerial := MonteCarloSimulationFinance{
 		tickerSymbol:      "AAPL",
@@ -256,31 +283,76 @@ func main() {
 	monteCarloSimulationFinanceSerial.dataAcquisition()
 	monteCarloSimulationFinanceSerial.calculatePeriodicDailyReturn()
 	fmt.Println("Stock market price predictions using the Monte Carlo simulation serial version")
-	serialPredictions, serialExecutionTime := monteCarloSimulationFinanceSerial.mcsFinanceSerial(numberOfSimulationsSerial, predictionWindowSizeSerial)
-
+	_, serialExecutionTime := monteCarloSimulationFinanceSerial.mcsFinanceSerial(numberOfSimulations, predictionWindowSize)
 	fmt.Printf("Execution time(n = %d, p = %d, w = %d) = %f seconds\r\n",
-		numberOfSimulationsSerial, numberOfProcessesSerial,
-		predictionWindowSizeSerial, serialExecutionTime)
+		numberOfSimulations, numberOfProcessesSerial,
+		predictionWindowSize, serialExecutionTime)
 
-	monteCarloSimulationFinanceSerial.exportFinanceFileSerial(serialPredictions)
+	for numberOfProcessesParallel := 2; numberOfProcessesParallel < 14; numberOfProcessesParallel++ {
 
-	numberOfSimulationsParallel := 10
-	predictionWindowSizeParallel := 7
-	numberOfProcessesParallel := 4
-	monteCarloSimulationFinanceParallel := MonteCarloSimulationFinance{
-		tickerSymbol:      "AAPL",
-		startDate:         "2000-01-01",
-		endDate:           "2020-01-01",
-		numberOfProcesses: numberOfProcessesParallel}
-	monteCarloSimulationFinanceParallel.dataAcquisition()
-	monteCarloSimulationFinanceParallel.calculatePeriodicDailyReturn()
-	fmt.Println("Stock market price predictions using the Monte Carlo simulation parallel version")
-	parallelPredictions, parallelExecutionTime := monteCarloSimulationFinanceParallel.mcsFinanceParallel(numberOfSimulationsParallel, predictionWindowSizeParallel)
+		monteCarloSimulationFinanceParallel := MonteCarloSimulationFinance{
+			tickerSymbol:      "AAPL",
+			startDate:         "2000-01-01",
+			endDate:           "2020-01-01",
+			numberOfProcesses: numberOfProcessesParallel}
+		monteCarloSimulationFinanceParallel.dataAcquisition()
+		monteCarloSimulationFinanceParallel.calculatePeriodicDailyReturn()
+		fmt.Println("Stock market price predictions using the Monte Carlo simulation parallel version")
+		_, parallelExecutionTime := monteCarloSimulationFinanceParallel.mcsFinanceParallel(numberOfSimulations, predictionWindowSize)
 
-	fmt.Printf("Execution time(n = %d, p = %d, w = %d) = %f seconds\r\n",
-		numberOfSimulationsParallel, numberOfProcessesParallel,
-		predictionWindowSizeParallel, parallelExecutionTime)
+		fmt.Printf("Execution time(n = %d, p = %d, w = %d) = %f seconds\r\n",
+			numberOfSimulations, numberOfProcessesParallel,
+			predictionWindowSize, parallelExecutionTime)
 
-	monteCarloSimulationFinanceParallel.exportFinanceFileParallel(parallelPredictions)
+		achievedSpeedup := serialExecutionTime / parallelExecutionTime
+		theoreticalMaximumSpeedup := calculateAmdahlSpeedup(numberOfProcessesParallel)
+		fmt.Printf("Achieved speedup is: %f times.\r\n", achievedSpeedup)
+		fmt.Printf("Theoretical maximum speedup according to Amdahl’s law is: %f times.\r\n", theoreticalMaximumSpeedup)
+		row.WriteString(strconv.FormatInt(int64(numberOfProcessesParallel), 10) + "," + strconv.FormatFloat(achievedSpeedup, 'f', -1, 64) + "," + strconv.FormatInt(int64(theoreticalMaximumSpeedup), 10) + "\r\n")
+	}
+	exportScalingFile(row.String(), true)
+	fmt.Println("End strong scaling.")
+
+}
+
+func main() {
+	/*
+		numberOfSimulationsSerial := 10
+		predictionWindowSizeSerial := 7
+		numberOfProcessesSerial := 1
+		monteCarloSimulationFinanceSerial := MonteCarloSimulationFinance{
+			tickerSymbol:      "AAPL",
+			startDate:         "2000-01-01",
+			endDate:           "2020-01-01",
+			numberOfProcesses: numberOfProcessesSerial}
+		monteCarloSimulationFinanceSerial.dataAcquisition()
+		monteCarloSimulationFinanceSerial.calculatePeriodicDailyReturn()
+		fmt.Println("Stock market price predictions using the Monte Carlo simulation serial version")
+		serialPredictions, serialExecutionTime := monteCarloSimulationFinanceSerial.mcsFinanceSerial(numberOfSimulationsSerial, predictionWindowSizeSerial)
+		fmt.Printf("Execution time(n = %d, p = %d, w = %d) = %f seconds\r\n",
+			numberOfSimulationsSerial, numberOfProcessesSerial,
+			predictionWindowSizeSerial, serialExecutionTime)
+		monteCarloSimulationFinanceSerial.exportFinanceFileSerial(serialPredictions)
+
+		numberOfSimulationsParallel := 10
+		predictionWindowSizeParallel := 7
+		numberOfProcessesParallel := 4
+		monteCarloSimulationFinanceParallel := MonteCarloSimulationFinance{
+			tickerSymbol:      "AAPL",
+			startDate:         "2000-01-01",
+			endDate:           "2020-01-01",
+			numberOfProcesses: numberOfProcessesParallel}
+		monteCarloSimulationFinanceParallel.dataAcquisition()
+		monteCarloSimulationFinanceParallel.calculatePeriodicDailyReturn()
+		fmt.Println("Stock market price predictions using the Monte Carlo simulation parallel version")
+		parallelPredictions, parallelExecutionTime := monteCarloSimulationFinanceParallel.mcsFinanceParallel(numberOfSimulationsParallel, predictionWindowSizeParallel)
+
+		fmt.Printf("Execution time(n = %d, p = %d, w = %d) = %f seconds\r\n",
+			numberOfSimulationsParallel, numberOfProcessesParallel,
+			predictionWindowSizeParallel, parallelExecutionTime)
+
+		monteCarloSimulationFinanceParallel.exportFinanceFileParallel(parallelPredictions)
+	*/
+	strongScaling()
 
 }
