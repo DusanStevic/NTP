@@ -191,11 +191,33 @@ func strongScaling() {
 
 }
 
-func weakScalingExperiment() {
+func weakScaling() {
 	fmt.Println("=======================")
 	fmt.Println("Start weak scaling:")
 	fmt.Println("=======================")
-
+	//One row in the output file.
+	var row strings.Builder
+	row.WriteString("number_of_processes,achieved_speedup,theoretical_maximum_speedup\r\n")
+	numberOfSimulations := 100000000
+	for numberOfProcesses := 2; numberOfProcesses < 14; numberOfProcesses++ {
+		increasedNumberOfSimulations := numberOfSimulations * numberOfProcesses
+		monteCarloSimulationPi := MonteCarloSimulationPi{numberOfProcesses: numberOfProcesses}
+		monteCarloSimulationPi.experimentFlag = true
+		fmt.Println("Approximation of Pi by using the Monte Carlo simulation serial version")
+		serialPi, serialExecutionTime := monteCarloSimulationPi.mcsPiSerial(increasedNumberOfSimulations)
+		fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", increasedNumberOfSimulations, numberOfProcesses, serialPi)
+		fmt.Printf("Execution time (duration): %f seconds\r\n", serialExecutionTime)
+		fmt.Println("Approximation of Pi by using the Monte Carlo simulation parallel version")
+		parallelPi, parallelExecutionTime := monteCarloSimulationPi.mcsPiParallel(increasedNumberOfSimulations)
+		fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", increasedNumberOfSimulations, numberOfProcesses, parallelPi)
+		fmt.Printf("Execution time (duration): %f seconds.\r\n", parallelExecutionTime)
+		achievedSpeedup := serialExecutionTime / parallelExecutionTime
+		theoreticalMaximumSpeedup := calculateAmdahlSpeedup(numberOfProcesses)
+		fmt.Printf("Achieved speedup is: %f times.\r\n", achievedSpeedup)
+		fmt.Printf("Theoretical maximum speedup according to Amdahl’s law is: %f times.\r\n", theoreticalMaximumSpeedup)
+		row.WriteString(strconv.FormatInt(int64(numberOfProcesses), 10) + "," + strconv.FormatFloat(achievedSpeedup, 'f', -1, 64) + "," + strconv.FormatInt(int64(theoreticalMaximumSpeedup), 10) + "\r\n")
+	}
+	exportScalingFile(row.String(), false)
 	fmt.Println("End weak scaling.")
 
 }
@@ -219,6 +241,7 @@ func main() {
 	   	fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulations, numberOfProcesses, parallelPi)
 	   	fmt.Printf("Execution time (duration): %f seconds", parallelExecutionTime()) */
 
-	strongScaling()
+	//strongScaling()
+	weakScaling()
 
 }
