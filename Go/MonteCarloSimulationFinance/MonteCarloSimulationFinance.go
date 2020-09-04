@@ -314,6 +314,54 @@ func strongScaling() {
 	fmt.Println("End strong scaling.")
 
 }
+func weakScaling() {
+	fmt.Println("=======================")
+	fmt.Println("Start weak scaling:")
+	fmt.Println("=======================")
+	//One row in the output file.
+	var row strings.Builder
+	row.WriteString("number_of_processes,achieved_speedup,theoretical_maximum_speedup\r\n")
+	numberOfSimulations := 5000
+	predictionWindowSize := 7
+	for numberOfProcesses := 2; numberOfProcesses < 14; numberOfProcesses++ {
+		increasedNumberOfSimulations := numberOfSimulations * numberOfProcesses
+		monteCarloSimulationFinanceSerial := MonteCarloSimulationFinance{
+			tickerSymbol:      "AAPL",
+			startDate:         "2000-01-01",
+			endDate:           "2020-01-01",
+			numberOfProcesses: numberOfProcesses}
+		monteCarloSimulationFinanceSerial.dataAcquisition()
+		monteCarloSimulationFinanceSerial.calculatePeriodicDailyReturn()
+		fmt.Println("Stock market price predictions using the Monte Carlo simulation serial version")
+		_, serialExecutionTime := monteCarloSimulationFinanceSerial.mcsFinanceSerial(increasedNumberOfSimulations, predictionWindowSize)
+		fmt.Printf("Execution time(n = %d, p = %d, w = %d) = %f seconds\r\n",
+			increasedNumberOfSimulations, numberOfProcesses,
+			predictionWindowSize, serialExecutionTime)
+
+		monteCarloSimulationFinanceParallel := MonteCarloSimulationFinance{
+			tickerSymbol:      "AAPL",
+			startDate:         "2000-01-01",
+			endDate:           "2020-01-01",
+			numberOfProcesses: numberOfProcesses}
+		monteCarloSimulationFinanceParallel.dataAcquisition()
+		monteCarloSimulationFinanceParallel.calculatePeriodicDailyReturn()
+		fmt.Println("Stock market price predictions using the Monte Carlo simulation parallel version")
+		_, parallelExecutionTime := monteCarloSimulationFinanceParallel.mcsFinanceParallel(increasedNumberOfSimulations, predictionWindowSize)
+
+		fmt.Printf("Execution time(n = %d, p = %d, w = %d) = %f seconds\r\n",
+			increasedNumberOfSimulations, numberOfProcesses,
+			predictionWindowSize, parallelExecutionTime)
+
+		achievedSpeedup := serialExecutionTime / parallelExecutionTime
+		theoreticalMaximumSpeedup := calculateAmdahlSpeedup(numberOfProcesses)
+		fmt.Printf("Achieved speedup is: %f times.\r\n", achievedSpeedup)
+		fmt.Printf("Theoretical maximum speedup according to Amdahl’s law is: %f times.\r\n", theoreticalMaximumSpeedup)
+		row.WriteString(strconv.FormatInt(int64(numberOfProcesses), 10) + "," + strconv.FormatFloat(achievedSpeedup, 'f', -1, 64) + "," + strconv.FormatInt(int64(theoreticalMaximumSpeedup), 10) + "\r\n")
+	}
+	exportScalingFile(row.String(), false)
+	fmt.Println("End weak scaling.")
+
+}
 
 func main() {
 	/*
@@ -353,6 +401,7 @@ func main() {
 
 		monteCarloSimulationFinanceParallel.exportFinanceFileParallel(parallelPredictions)
 	*/
-	strongScaling()
+	//strongScaling()
+	weakScaling()
 
 }
