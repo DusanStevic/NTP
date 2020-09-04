@@ -82,10 +82,12 @@ class MonteCarloSimulationFinance:
             prediction.clear()
         return predictions
 
+    @calculate_execution_time
     def mcs_finance_serial(self, number_of_simulations, prediction_window_size):
         self.parallel_flag = False
         return self.simulation_finance(number_of_simulations, prediction_window_size)
 
+    @calculate_execution_time
     def mcs_finance_parallel(self, number_of_simulations, prediction_window_size):
         self.parallel_flag = True
         pool = Pool(processes=self.number_of_processes)
@@ -101,10 +103,9 @@ class MonteCarloSimulationFinance:
         predictions = pool.starmap(self.simulation_finance, simulations_per_process)
         return predictions
 
-    def export_finance_file(self, number_of_simulations, prediction_window_size):
+    def export_finance_file(self, predictions):
         serial_number = 1
         if self.parallel_flag == False:
-            predictions = self.mcs_finance_serial(number_of_simulations, prediction_window_size)
             # r before string converts normal string to raw string
             path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP" \
                    r"\Execution Results\Finance\PythonFinanceSerial.txt"
@@ -125,7 +126,6 @@ class MonteCarloSimulationFinance:
             out_file.close()
 
         else:
-            predictions = self.mcs_finance_parallel(number_of_simulations, prediction_window_size)
             # r before string converts normal string to raw string
             path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP" \
                    r"\Execution Results\Finance\PythonFinanceParallel.txt"
@@ -148,16 +148,51 @@ class MonteCarloSimulationFinance:
 
 
 if __name__ == "__main__":
-    monte_carlo_simulation_finance = MonteCarloSimulationFinance('1980-01-01', '2019-12-31', 'AAPL', 5)
+    number_of_simulations_n = 100
+    prediction_window_size_w = 7
+    number_of_processes_p = 1
+    monte_carlo_simulation_finance = MonteCarloSimulationFinance('1980-01-01', '2019-12-31', 'AAPL', number_of_processes_p)
     monte_carlo_simulation_finance.data_acquisition()
     monte_carlo_simulation_finance.calculate_periodic_daily_return()
-    start = time.time()
-    # print("Stock market price predictions using the Monte Carlo simulation serial version:" + str(
-    # monte_carlo_simulation_finance.mcs_finance_serial(10, 5)))
-    print("Stock market price predictions using the Monte Carlo simulation parallel version:" + str(
-        monte_carlo_simulation_finance.mcs_finance_parallel(10, 5)))
-    end = time.time()
-    duration = end - start
-    print(f"Duration {duration} seconds")
+    serial_predictions, serial_execution_time = monte_carlo_simulation_finance.mcs_finance_serial(number_of_simulations_n,
+                                                                                                  prediction_window_size_w)
+    print("Stock market price predictions using the Monte Carlo simulation serial version")
+    print("Execution time(n = {}, p = {}, w = {}) = {} seconds".format(number_of_simulations_n,
+                                                                       number_of_processes_p,
+                                                                       prediction_window_size_w, serial_execution_time))
+    monte_carlo_simulation_finance.export_finance_file(serial_predictions)
 
-    monte_carlo_simulation_finance.export_finance_file(10, 8)
+    number_of_simulations_n = 100
+    prediction_window_size_w = 7
+    number_of_processes_p = 4
+    monte_carlo_simulation_finance = MonteCarloSimulationFinance('1980-01-01', '2019-12-31', 'AAPL',
+                                                                 number_of_processes_p)
+    monte_carlo_simulation_finance.data_acquisition()
+    monte_carlo_simulation_finance.calculate_periodic_daily_return()
+    parallel_predictions, parallel_execution_time = monte_carlo_simulation_finance.mcs_finance_parallel(
+        number_of_simulations_n,
+        prediction_window_size_w)
+    print("Stock market price predictions using the Monte Carlo simulation parallel version")
+    print("Execution time(n = {}, p = {}, w = {}) = {} seconds".format(number_of_simulations_n,
+                                                                       number_of_processes_p,
+                                                                       prediction_window_size_w, parallel_execution_time))
+    monte_carlo_simulation_finance.export_finance_file(parallel_predictions)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
