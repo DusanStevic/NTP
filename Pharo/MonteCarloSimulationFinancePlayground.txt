@@ -2,7 +2,7 @@
 numberOfSimulations:=0.
 
 	tab := RTTabTable new 
-			input: 'C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Pharo\MonteCarloSimulationFinance.txt' asFileReference contents 
+			input: 'C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Execution Results\Finance\PythonFinanceSerial.txt' asFileReference contents 
 			usingDelimiter: $,.
 tab values do: [ :row |numberOfSimulations:=numberOfSimulations+1. ].
 b := RTGrapher new.
@@ -65,7 +65,7 @@ deco legendLabel
 		| pos year |
 		pos := deco calculatePointFor: as key and: as value asInteger.
 		year := (tab values at: (b datasets indexOf: as key)) first.
-		'The International ' , year , ' $'
+		'Simulation ' , year , ' $'
 			, pos y asInteger asStringWithCommas ].
 b addDecorator: deco.
 b build.
