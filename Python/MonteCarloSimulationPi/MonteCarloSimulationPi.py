@@ -78,21 +78,21 @@ class MonteCarloSimulationPi:
 
 
 if __name__ == "__main__":
-    number_of_simulations_n = 2500000
-    number_of_processes_p = 1
-    monte_carlo_simulation_pi = MonteCarloSimulationPi(number_of_processes_p)
-    monte_carlo_simulation_pi.experiment_flag = False
+    number_of_simulations_serial = 1000
+    number_of_processes_serial = 1
+    monte_carlo_simulation_pi_serial = MonteCarloSimulationPi(number_of_processes_serial)
+    monte_carlo_simulation_pi_serial.experiment_flag = False
     print("Approximation of Pi by using the Monte Carlo simulation serial version")
-    serial_pi, serial_execution_time = monte_carlo_simulation_pi.mcs_pi_serial(number_of_simulations_n)
-    print("Pi(n = {}, p = {}) = {}".format(number_of_simulations_n,number_of_processes_p,serial_pi))
+    serial_pi, serial_execution_time = monte_carlo_simulation_pi_serial.mcs_pi_serial(number_of_simulations_serial)
+    print("Pi(n = {}, p = {}) = {}".format(number_of_simulations_serial,number_of_processes_serial,serial_pi))
     print("Execution time (duration): {} seconds".format(serial_execution_time))
 
-    number_of_simulations_n = 2500000
-    number_of_processes_p = 4
-    monte_carlo_simulation_pi = MonteCarloSimulationPi(number_of_processes_p)
-    monte_carlo_simulation_pi.experiment_flag = False
+    number_of_simulations_parallel = 1000
+    number_of_processes_parallel = 4
+    monte_carlo_simulation_pi_parallel = MonteCarloSimulationPi(number_of_processes_parallel)
+    monte_carlo_simulation_pi_parallel.experiment_flag = False
     print("Approximation of Pi by using the Monte Carlo simulation parallel version")
-    parallel_pi, parallel_execution_time = monte_carlo_simulation_pi.mcs_pi_parallel(number_of_simulations_n)
-    print("Pi(n = {}, p = {}) = {}".format(number_of_simulations_n,number_of_processes_p,parallel_pi))
+    parallel_pi, parallel_execution_time = monte_carlo_simulation_pi_parallel.mcs_pi_parallel(number_of_simulations_parallel)
+    print("Pi(n = {}, p = {}) = {}".format(number_of_simulations_parallel,number_of_processes_parallel,parallel_pi))
     print("Execution time (duration): {} seconds".format(parallel_execution_time))
 

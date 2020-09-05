@@ -223,25 +223,25 @@ func weakScaling() {
 }
 
 func main() {
-	/* 	numberOfSimulations := 1000000000
-	   	numberOfProcesses := 1
-	   	monteCarloSimulationPi := MonteCarloSimulationPi{numberOfProcesses: numberOfProcesses}
-	   	monteCarloSimulationPi.experimentFlag = true
-	   	fmt.Println("Approximation of Pi by using the Monte Carlo simulation serial version")
-	   	serialPi, serialExecutionTime := monteCarloSimulationPi.mcsPiSerial(numberOfSimulations)
-	   	fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulations, numberOfProcesses, serialPi)
-	   	fmt.Printf("Execution time (duration): %f seconds\r\n", serialExecutionTime()) */
+	numberOfSimulationsSerial := 1000
+	numberOfProcessesSerial := 1
+	monteCarloSimulationPiSerial := MonteCarloSimulationPi{numberOfProcesses: numberOfProcessesSerial}
+	monteCarloSimulationPiSerial.experimentFlag = false
+	fmt.Println("Approximation of Pi by using the Monte Carlo simulation serial version")
+	serialPi, serialExecutionTime := monteCarloSimulationPiSerial.mcsPiSerial(numberOfSimulationsSerial)
+	fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulationsSerial, numberOfProcessesSerial, serialPi)
+	fmt.Printf("Execution time (duration): %f seconds\r\n", serialExecutionTime)
 
-	/* 	numberOfSimulations = 1000000000
-	   	numberOfProcesses = 4
-	   	monteCarloSimulationPi = MonteCarloSimulationPi{numberOfProcesses: numberOfProcesses}
-	   	monteCarloSimulationPi.experimentFlag = true
-	   	fmt.Println("Approximation of Pi by using the Monte Carlo simulation parallel version")
-	   	parallelPi, parallelExecutionTime := monteCarloSimulationPi.mcsPiParallel(numberOfSimulations)
-	   	fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulations, numberOfProcesses, parallelPi)
-	   	fmt.Printf("Execution time (duration): %f seconds", parallelExecutionTime()) */
+	numberOfSimulationsParallel := 4000
+	numberOfProcessesParallel := 4
+	monteCarloSimulationPiParallel := MonteCarloSimulationPi{numberOfProcesses: numberOfProcessesParallel}
+	monteCarloSimulationPiParallel.experimentFlag = false
+	fmt.Println("Approximation of Pi by using the Monte Carlo simulation parallel version")
+	parallelPi, parallelExecutionTime := monteCarloSimulationPiParallel.mcsPiParallel(numberOfSimulationsParallel)
+	fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulationsParallel, numberOfProcessesParallel, parallelPi)
+	fmt.Printf("Execution time (duration): %f seconds", parallelExecutionTime)
 
 	//strongScaling()
-	weakScaling()
+	//weakScaling()
 
 }

@@ -1,6 +1,6 @@
 ﻿m := MonteCarloSimulationPi  new.
 m openInWindowLabeled: 'Approximation of Pi by using the Monte Carlo Simulation'.
-m load: 'C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Pharo\MonteCarloSimulationPi.txt'.
+m load: 'C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Execution Results\Pi\PythonPiSerial.txt'.
 m drawBlock: [:c |
 c frameRectangle: (0@0 extent: 500@500) color: Color red.
 c frameOval: (0@0 extent: 500@500) color: Color red.
