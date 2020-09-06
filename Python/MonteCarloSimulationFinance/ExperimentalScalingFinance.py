@@ -44,8 +44,8 @@ def strong_scaling():
     out_file = open(path, "w")
     out_file.write("number_of_processes,achieved_speedup,theoretical_maximum_speedup\n")
 
-    number_of_simulations_n = 10000
-    prediction_window_size_w = 7
+    number_of_simulations_n = 10
+    prediction_window_size_w = 100
     number_of_processes_serial = 1
     monte_carlo_simulation_finance = MonteCarloSimulationFinance('1980-01-01', '2019-12-31', 'AAPL',
                                                                  number_of_processes_serial)
@@ -91,8 +91,8 @@ def weak_scaling():
            r"\Scaling Results\Finance\PythonFinanceWeakScaling.csv"
     out_file = open(path, "w")
     out_file.write("number_of_processes,achieved_speedup,theoretical_maximum_speedup\n")
-    number_of_simulations_n = 500
-    prediction_window_size_w = 7
+    number_of_simulations_n = 10
+    prediction_window_size_w = 100
 
     for number_of_processes_p in range(2, 14):
         increased_number_of_simulations = number_of_simulations_n * number_of_processes_p

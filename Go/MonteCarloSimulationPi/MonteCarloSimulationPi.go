@@ -165,7 +165,7 @@ func strongScaling() {
 	//One row in the output file.
 	var row strings.Builder
 	row.WriteString("number_of_processes,achieved_speedup,theoretical_maximum_speedup\r\n")
-	numberOfSimulations := 100000000
+	numberOfSimulations := 5000000
 	numberOfProcessesSerial := 1
 	monteCarloSimulationPiSerial := MonteCarloSimulationPi{numberOfProcesses: numberOfProcessesSerial}
 	monteCarloSimulationPiSerial.experimentFlag = true
@@ -198,7 +198,7 @@ func weakScaling() {
 	//One row in the output file.
 	var row strings.Builder
 	row.WriteString("number_of_processes,achieved_speedup,theoretical_maximum_speedup\r\n")
-	numberOfSimulations := 100000000
+	numberOfSimulations := 5000000
 	for numberOfProcesses := 2; numberOfProcesses < 14; numberOfProcesses++ {
 		increasedNumberOfSimulations := numberOfSimulations * numberOfProcesses
 		monteCarloSimulationPi := MonteCarloSimulationPi{numberOfProcesses: numberOfProcesses}
@@ -223,25 +223,27 @@ func weakScaling() {
 }
 
 func main() {
-	numberOfSimulationsSerial := 1000
-	numberOfProcessesSerial := 1
-	monteCarloSimulationPiSerial := MonteCarloSimulationPi{numberOfProcesses: numberOfProcessesSerial}
-	monteCarloSimulationPiSerial.experimentFlag = false
-	fmt.Println("Approximation of Pi by using the Monte Carlo simulation serial version")
-	serialPi, serialExecutionTime := monteCarloSimulationPiSerial.mcsPiSerial(numberOfSimulationsSerial)
-	fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulationsSerial, numberOfProcessesSerial, serialPi)
-	fmt.Printf("Execution time (duration): %f seconds\r\n", serialExecutionTime)
-
-	numberOfSimulationsParallel := 4000
-	numberOfProcessesParallel := 4
-	monteCarloSimulationPiParallel := MonteCarloSimulationPi{numberOfProcesses: numberOfProcessesParallel}
-	monteCarloSimulationPiParallel.experimentFlag = false
-	fmt.Println("Approximation of Pi by using the Monte Carlo simulation parallel version")
-	parallelPi, parallelExecutionTime := monteCarloSimulationPiParallel.mcsPiParallel(numberOfSimulationsParallel)
-	fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulationsParallel, numberOfProcessesParallel, parallelPi)
-	fmt.Printf("Execution time (duration): %f seconds", parallelExecutionTime)
-
-	//strongScaling()
-	//weakScaling()
+	/*
+		numberOfSimulationsSerial := 1000
+		numberOfProcessesSerial := 1
+		monteCarloSimulationPiSerial := MonteCarloSimulationPi{numberOfProcesses: numberOfProcessesSerial}
+		monteCarloSimulationPiSerial.experimentFlag = false
+		fmt.Println("Approximation of Pi by using the Monte Carlo simulation serial version")
+		serialPi, serialExecutionTime := monteCarloSimulationPiSerial.mcsPiSerial(numberOfSimulationsSerial)
+		fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulationsSerial, numberOfProcessesSerial, serialPi)
+		fmt.Printf("Execution time (duration): %f seconds\r\n", serialExecutionTime)
+	*/
+	/*
+		numberOfSimulationsParallel := 1000
+		numberOfProcessesParallel := 4
+		monteCarloSimulationPiParallel := MonteCarloSimulationPi{numberOfProcesses: numberOfProcessesParallel}
+		monteCarloSimulationPiParallel.experimentFlag = false
+		fmt.Println("Approximation of Pi by using the Monte Carlo simulation parallel version")
+		parallelPi, parallelExecutionTime := monteCarloSimulationPiParallel.mcsPiParallel(numberOfSimulationsParallel)
+		fmt.Printf("Pi(n = %d, p = %d) = %f\r\n", numberOfSimulationsParallel, numberOfProcessesParallel, parallelPi)
+		fmt.Printf("Execution time (duration): %f seconds", parallelExecutionTime)
+	*/
+	strongScaling()
+	weakScaling()
 
 }
