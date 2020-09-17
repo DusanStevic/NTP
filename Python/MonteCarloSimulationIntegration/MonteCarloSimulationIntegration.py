@@ -21,39 +21,51 @@ class MonteCarloSimulationIntegration:
         self.number_of_processes = number_of_processes
         self.parallel_flag = False
         self.experiment_flag = False
+        # Upper and Lower Bounds of Integral.
+        self.LOWER_BOUND = 0
+        self.UPPER_BOUND = 1
+        # The area under the graph of a function can be found by adding slices that approach zero in width.
+        self.SLICE_SIZE = 0.01
 
-    # Upper and Lower Bounds of Integral.
-    # The area under the graph of a function can be found by adding slices that approach zero in width.
     # The function f(x) to be integrated is called the integrand.
+    # The function we are integrating must be non-negative continuous function between lower bound and upper bound
+    # Non-negative function: is a function when it attain non negative values only. A function would be called a
+    # positive function if its values are positive for all arguments of its domain, or a non-negative function
+    # if all of its values are non-negative. The function graph sits above or on the x-axis.
+    # Continuous function: is a function with no holes, jumps or vertical asymptotes
+    # (where the function heads up/down towards infinity). A vertical asymptote between lower bound and
+    # upper bound affects the definite integral.
+    def function(self, x):
+        return math.sqrt(1-x*x)
 
-    def simulation_integration(self, number_of_simulations, lower_bound, upper_bound, slice_size, function):
+    def simulation_integration(self, number_of_simulations):
         if self.experiment_flag == True:
             # Points under the graph of a function.
             below = 0
-            lower_bound_interval = lower_bound
-            upper_bound_interval = upper_bound
+            lower_bound_interval = self.LOWER_BOUND
+            upper_bound_interval = self.UPPER_BOUND
             # Define the interval between the lower and upper bound.
             x = []
             # Function Values
             y = []
             # Maximum of the function f(x) on the interval[lower_bound, upper_bound]
-            f_max = function(lower_bound)
+            f_max = self.function(self.LOWER_BOUND)
 
             while lower_bound_interval < upper_bound_interval:
                 x.append(lower_bound_interval)
-                t = function(lower_bound_interval)
+                t = self.function(lower_bound_interval)
                 y.append(t)
                 if t > f_max:
                     f_max = t
-                lower_bound_interval += slice_size
+                lower_bound_interval += self.SLICE_SIZE
 
             for _ in range(number_of_simulations):
-                x_rand = lower_bound + (upper_bound - lower_bound) * random.random()
+                x_rand = self.LOWER_BOUND + (self.UPPER_BOUND - self.LOWER_BOUND) * random.random()
                 y_rand = 0 + f_max * random.random()
-                if y_rand < function(x_rand):
+                if y_rand < self.function(x_rand):
                     below = below + 1
             # Rectangle area that surrounds the area under the graph of a function.
-            a = upper_bound - lower_bound
+            a = self.UPPER_BOUND - self.LOWER_BOUND
             b = f_max - 0
             rectangle_area = a * b
             # bellow = Points under the graph of a function.
@@ -86,38 +98,51 @@ class MonteCarloSimulationIntegration:
             return below
 
     @calculate_execution_time
-    def mcs_integration_serial(self, number_of_simulations, lower_bound, upper_bound, slice_size, function):
+    def mcs_integration_serial(self, number_of_simulations):
         self.parallel_flag = False
-        integral = self.simulation_integration(number_of_simulations, lower_bound, upper_bound, slice_size, function)
+        integral = self.simulation_integration(number_of_simulations)
+        return integral
+
+    @calculate_execution_time
+    def mcs_integration_parallel(self, number_of_simulations):
+        self.parallel_flag = True
+        pool = Pool(processes=self.number_of_processes)
+        number_of_simulations_per_process = int(number_of_simulations / self.number_of_processes)
+        simulations_per_process = []
+        # Append the same value multiple times to a list
+        # To add v, n times, to l:
+        # l += n * [v]
+        # Mapping a function with multiple arguments to a multiprocessing pool will distribute
+        # the input data across processes to be run with the referenced function.
+        simulations_per_process += self.number_of_processes * [number_of_simulations_per_process]
+        # list of partial result per process
+        list_of_integral_per_process = pool.map(self.simulation_integration, simulations_per_process)
+        # cumulative result, aggregating partial results
+        integral_per_processes = sum(list_of_integral_per_process)
+        integral = integral_per_processes / self.number_of_processes
         return integral
 
 
 if __name__ == "__main__":
-    lower_bound = 1
-    upper_bound = 2
-    slice_size = 0.01
 
-
-    # The function f(x) to be integrated is called the integrand.
-    # The function we are integrating must be non-negative continuous function between lower bound and upper bound
-    # Non-negative function: is a function when it attain non negative values only. A function would be called a
-    # positive function if its values are positive for all arguments of its domain, or a non-negative function
-    # if all of its values are non-negative. The function graph sits above or on the x-axis.
-    # Continuous function: is a function with no holes, jumps or vertical asymptotes
-    # (where the function heads up/down towards infinity). A vertical asymptote between lower bound and
-    # upper bound affects the definite integral.
-
-    def f(x):
-        return 2 * x
-
-
-    number_of_simulations_serial = 10000
+    number_of_simulations_serial = 10000000
     number_of_processes_serial = 1
     monte_carlo_simulation_integration_serial = MonteCarloSimulationIntegration(number_of_processes_serial)
     monte_carlo_simulation_integration_serial.experiment_flag = True
     print("Integral Approximation by using the Monte Carlo simulation serial version")
     serial_integration, serial_execution_time = monte_carlo_simulation_integration_serial.mcs_integration_serial(
-        number_of_simulations_serial, lower_bound, upper_bound, slice_size, f)
+        number_of_simulations_serial)
     print("Integral(n = {}, p = {}) = {}".format(number_of_simulations_serial, number_of_processes_serial,
                                                  serial_integration))
     print("Execution time (duration): {} seconds".format(serial_execution_time))
+
+    number_of_simulations_parallel = 10000000
+    number_of_processes_parallel = 4
+    monte_carlo_simulation_integration_parallel = MonteCarloSimulationIntegration(number_of_processes_parallel)
+    monte_carlo_simulation_integration_parallel.experiment_flag = True
+    print("Integral Approximation by using the Monte Carlo simulation parallel version")
+    parallel_integration, parallel_execution_time = monte_carlo_simulation_integration_parallel.mcs_integration_parallel(
+        number_of_simulations_parallel)
+    print("Integral(n = {}, p = {}) = {}".format(number_of_simulations_parallel, number_of_processes_parallel,
+                                                 parallel_integration))
+    print("Execution time (duration): {} seconds".format(parallel_execution_time))
