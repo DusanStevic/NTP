@@ -127,6 +127,30 @@ func (MonteCarloSimulationIntegration *MonteCarloSimulationIntegration) mcsInteg
 	executionTime := time.Since(startTime).Seconds()
 	return integral, executionTime
 }
+
+func (MonteCarloSimulationIntegration *MonteCarloSimulationIntegration) mcsIntegrationParallel(numberOfSimulations int) (float64, float64) {
+	startTime := time.Now()
+	MonteCarloSimulationIntegration.parallelFlag = true
+	numberOfSimulationsPerProcess := numberOfSimulations / MonteCarloSimulationIntegration.numberOfProcesses
+	/* 	Buffered channels are useful when you know how many goroutines you have launched,
+	   	want to limit the number of goroutines you will launch, or want to limit
+	   	the amount of work that is queued up. */
+	channel := make(chan float64, MonteCarloSimulationIntegration.numberOfProcesses)
+	// partial result per process
+	for i := 0; i < MonteCarloSimulationIntegration.numberOfProcesses; i++ {
+		go MonteCarloSimulationIntegration.simulationIntegration(numberOfSimulationsPerProcess, channel)
+	}
+
+	var integralPerProcesses float64
+	// cumulative result, aggregating partial results
+	for i := 0; i < MonteCarloSimulationIntegration.numberOfProcesses; i++ {
+		integralPerProcesses += <-channel
+	}
+	integral := float64(integralPerProcesses) / float64(MonteCarloSimulationIntegration.numberOfProcesses)
+	executionTime := time.Since(startTime).Seconds()
+	return integral, executionTime
+
+}
 func (MonteCarloSimulationIntegration *MonteCarloSimulationIntegration) exportIntegrationFile(simulations string) {
 	var path string
 	if MonteCarloSimulationIntegration.parallelFlag == false {
@@ -157,4 +181,13 @@ func main() {
 	serialIntegration, serialExecutionTime := monteCarloSimulationIntegrationSerial.mcsIntegrationSerial(numberOfSimulationsSerial)
 	fmt.Printf("Integral(n = %d, p = %d) = %f\r\n", numberOfSimulationsSerial, numberOfProcessesSerial, serialIntegration)
 	fmt.Printf("Execution time (duration): %f seconds\r\n", serialExecutionTime)
+
+	numberOfSimulationsParallel := 1000000000
+	numberOfProcessesParallel := 4
+	monteCarloSimulationIntegrationParallel := MonteCarloSimulationIntegration{numberOfProcesses: numberOfProcessesParallel}
+	monteCarloSimulationIntegrationParallel.experimentFlag = true
+	fmt.Println("Integral Approximation by using the Monte Carlo simulation parallel version")
+	parallelIntegration, parallelExecutionTime := monteCarloSimulationIntegrationParallel.mcsIntegrationParallel(numberOfSimulationsParallel)
+	fmt.Printf("Integral(n = %d, p = %d) = %f\r\n", numberOfSimulationsParallel, numberOfProcessesParallel, parallelIntegration)
+	fmt.Printf("Execution time (duration): %f seconds", parallelExecutionTime)
 }
