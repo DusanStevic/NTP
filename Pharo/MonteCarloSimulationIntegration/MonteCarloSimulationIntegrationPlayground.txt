@@ -1,9 +1,9 @@
-| f g b ds xValues |
-f := [ :x | x ].
-g := [ :x | x * x ].
+| b ds xValues |
+
+function := [ :x | x * x ].
 rand := Random new.
-ispod := Array new: 50.
-iznad := Array new: 50.
+belowPoints := Array new: 50.
+abovePoints := Array new: 50.
 d1 := RTData new.
 d1 dotShape color: Color red.
 d2 := RTData new.
@@ -16,22 +16,22 @@ b extent: 300 @ 300.
 ds := RTData new.
 ds noDot.
 ds points: xValues.
-ds y: g.
+ds y: function.
 ds x: #yourself.
 ds connectColor: Color green.
 b add: ds.
 1 to: 50 do: [: i |
 
-	ispod at: i put: 0@0.
-	iznad at: i put: 0@0.
+	belowPoints at: i put: 0@0.
+	abovePoints at: i put: 0@0.
 	x := (rand next * 55).
 	y:=(rand next * 3200).
-	a:= g value: x.
+	a:= function value: x.
 	y<a
 		ifTrue: [
-			ispod at: i put: x@y.]
+			belowPoints at: i put: x@y.]
 		ifFalse: [
-			iznad at: i put: x@y.].
+			abovePoints at: i put: x@y.].
 
 
 
@@ -39,13 +39,13 @@ b add: ds.
 ].
 
 
-d1 points:ispod.
+d1 points:belowPoints.
 d1 x: #x.
 d1 y: #y.
 b add: d1.
 
 
-d2 points:iznad.
+d2 points:abovePoints.
 d2 x: #x.
 d2 y: #y.
 b add: d2.
