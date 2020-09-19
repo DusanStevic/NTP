@@ -9,13 +9,13 @@ if all of its values are non-negative. The function graph sits above or on the x
 Continuous function: is a function with no holes, jumps or vertical asymptotes
 (where the function heads up/down towards infinity). A vertical asymptote between lower bound and
 upper bound affects the definite integral."
-function := [ :x | x * x ].
+function := [ :x | 2 * x ].
 "Lower Bound of Integral."
-lowerBound := 0.
+lowerBound := 1.
 "Upper Bound of Integral."
-upperBound := 55.
+upperBound := 2.
 "The area under the graph of a function can be found by adding slices that approach zero in width."
-sliceSize := 0.1.
+sliceSize := 0.01.
 rand := Random new.
 belowPoints := Array new: m numberOfSimulations.
 abovePoints := Array new: m numberOfSimulations.
@@ -34,16 +34,27 @@ functionGraph y: function.
 functionGraph x: #yourself.
 functionGraph connectColor: Color green.
 graph add: functionGraph.
+fMax:= function value: lowerBound.
+[lowerBound < upperBound] whileTrue: [
+t:= function value: lowerBound.
+
+t>fMax
+	ifTrue: [fMax := t.].
+lowerBound := lowerBound + sliceSize.
+].
+below := 0.
+integral:= 0.
 1 to: m numberOfSimulations do: [: i |
 
 	belowPoints at: i put: 0@0.
 	abovePoints at: i put: 0@0.
-	x := (rand next * 55).
-	y:=(rand next * 3200).
+	x := (m xCoordinate at: i).
+	y:=(m yCoordinate at: i).
 	t:= function value: x.
 	y<t
 		ifTrue: [
-			belowPoints at: i put: x@y.]
+			belowPoints at: i put: x@y.
+			below := below + 1.]
 		ifFalse: [
 			abovePoints at: i put: x@y.].
 
