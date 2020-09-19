@@ -83,19 +83,43 @@ class MonteCarloSimulationIntegration:
                 path = r"C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP" \
                        r"\Execution Results\Integration\PythonIntegrationParallel.txt"
             out_file = open(path, "w")
+
+            # Points under the graph of a function.
             below = 0
+            lower_bound_interval = self.LOWER_BOUND
+            upper_bound_interval = self.UPPER_BOUND
+            # Define the interval between the lower and upper bound.
+            x = []
+            # Function Values
+            y = []
+            # Maximum of the function f(x) on the interval[lower_bound, upper_bound]
+            f_max = self.function(self.LOWER_BOUND)
+
+            while lower_bound_interval < upper_bound_interval:
+                x.append(lower_bound_interval)
+                t = self.function(lower_bound_interval)
+                y.append(t)
+                if t > f_max:
+                    f_max = t
+                lower_bound_interval += self.SLICE_SIZE
+
             for _ in range(number_of_simulations):
-                x = random.random()
-                y = random.random()
-                # Pharo for Data Visualization. Circle of radius 250 centered at the point(250, 250).
-                # To create a Rectangle in Pharo you must provide the top left and the bottom right points.
-                out_file.write(str(int(x * 500)) + ' ' + str(int(y * 500)) + '\n')
-                # The unit circle is the circle of radius 1 centered at the origin(0, 0)
-                # in the Cartesia coordinate system in the Euclidean plane.
-                if x * x + y * y < 1:
+                x_rand = self.LOWER_BOUND + (self.UPPER_BOUND - self.LOWER_BOUND) * random.random()
+                y_rand = 0 + f_max * random.random()
+                out_file.write(str(round(x_rand, 2)) + ' ' + str(round(y_rand, 2)) + '\n')
+                if y_rand < self.function(x_rand):
                     below = below + 1
+            # Rectangle area that surrounds the area under the graph of a function.
+            a = self.UPPER_BOUND - self.LOWER_BOUND
+            b = f_max - 0
+            rectangle_area = a * b
+            # bellow = Points under the graph of a function.
+            # number_of_simulations = Total number of points = Points inside rectangle
+            proportion = below / number_of_simulations
+            integral = proportion * rectangle_area
             out_file.close()
-            return below
+            return integral
+
 
     @calculate_execution_time
     def mcs_integration_serial(self, number_of_simulations):
@@ -125,10 +149,10 @@ class MonteCarloSimulationIntegration:
 
 if __name__ == "__main__":
 
-    number_of_simulations_serial = 10000000
+    number_of_simulations_serial = 100
     number_of_processes_serial = 1
     monte_carlo_simulation_integration_serial = MonteCarloSimulationIntegration(number_of_processes_serial)
-    monte_carlo_simulation_integration_serial.experiment_flag = True
+    monte_carlo_simulation_integration_serial.experiment_flag = False
     print("Integral Approximation by using the Monte Carlo simulation serial version")
     serial_integration, serial_execution_time = monte_carlo_simulation_integration_serial.mcs_integration_serial(
         number_of_simulations_serial)
@@ -136,10 +160,10 @@ if __name__ == "__main__":
                                                  serial_integration))
     print("Execution time (duration): {} seconds".format(serial_execution_time))
 
-    number_of_simulations_parallel = 10000000
+    number_of_simulations_parallel = 100
     number_of_processes_parallel = 4
     monte_carlo_simulation_integration_parallel = MonteCarloSimulationIntegration(number_of_processes_parallel)
-    monte_carlo_simulation_integration_parallel.experiment_flag = True
+    monte_carlo_simulation_integration_parallel.experiment_flag = False
     print("Integral Approximation by using the Monte Carlo simulation parallel version")
     parallel_integration, parallel_execution_time = monte_carlo_simulation_integration_parallel.mcs_integration_parallel(
         number_of_simulations_parallel)
