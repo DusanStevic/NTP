@@ -1,26 +1,40 @@
-| b ds xValues |
+m := MonteCarloSimulationIntegration  new.
+m load: 'C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Execution Results\Integration\PythonIntegrationSerial.txt'.
 
+"The function f(x) to be integrated is called the integrand.
+The function we are integrating must be non-negative continuous function between lower bound and upper bound
+Non-negative function: is a function when it attain non negative values only. A function would be called a
+positive function if its values are positive for all arguments of its domain, or a non-negative function
+if all of its values are non-negative. The function graph sits above or on the x-axis.
+Continuous function: is a function with no holes, jumps or vertical asymptotes
+(where the function heads up/down towards infinity). A vertical asymptote between lower bound and
+upper bound affects the definite integral."
 function := [ :x | x * x ].
+"Lower Bound of Integral."
+lowerBound := 0.
+"Upper Bound of Integral."
+upperBound := 55.
+"The area under the graph of a function can be found by adding slices that approach zero in width."
+sliceSize := 0.1.
 rand := Random new.
-belowPoints := Array new: 50.
-abovePoints := Array new: 50.
-d1 := RTData new.
-d1 dotShape color: Color red.
-d2 := RTData new.
-d2 dotShape color: Color blue.
-lower:=0.
-upper:=55.
-xValues := lower to: upper by: 0.1.
-b := RTGrapher new.
-b extent: 300 @ 300.
-ds := RTData new.
-ds noDot.
-ds points: xValues.
-ds y: function.
-ds x: #yourself.
-ds connectColor: Color green.
-b add: ds.
-1 to: 50 do: [: i |
+belowPoints := Array new: m numberOfSimulations.
+abovePoints := Array new: m numberOfSimulations.
+belowGraph := RTData new.
+belowGraph dotShape color: Color red.
+aboveGraph := RTData new.
+aboveGraph dotShape color: Color blue.
+
+xValues := lowerBound to: upperBound by: sliceSize.
+graph := RTGrapher new.
+graph extent: 300 @ 300.
+functionGraph := RTData new.
+functionGraph noDot.
+functionGraph points: xValues.
+functionGraph y: function.
+functionGraph x: #yourself.
+functionGraph connectColor: Color green.
+graph add: functionGraph.
+1 to: m numberOfSimulations do: [: i |
 
 	belowPoints at: i put: 0@0.
 	abovePoints at: i put: 0@0.
@@ -39,14 +53,14 @@ b add: ds.
 ].
 
 
-d1 points:belowPoints.
-d1 x: #x.
-d1 y: #y.
-b add: d1.
+belowGraph points:belowPoints.
+belowGraph x: #x.
+belowGraph y: #y.
+graph add: belowGraph.
 
 
-d2 points:abovePoints.
-d2 x: #x.
-d2 y: #y.
-b add: d2.
-^ b
+aboveGraph points:abovePoints.
+aboveGraph x: #x.
+aboveGraph y: #y.
+graph add: aboveGraph.
+^ graph

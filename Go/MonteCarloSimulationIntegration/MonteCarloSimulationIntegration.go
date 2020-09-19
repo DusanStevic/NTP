@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	// LOWER_BOUND of Integral.
+	// Lower bound of Integral.
 	lowerBound = 1.0
-	// Upper and Lower Bounds of Integral.
+	// Upper bound of Integral.
 	upperBound = 2.0
 	// The area under the graph of a function can be found by adding slices that approach zero in width.
 	sliceSize = 0.01
