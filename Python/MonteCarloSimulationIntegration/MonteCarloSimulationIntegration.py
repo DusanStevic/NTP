@@ -22,8 +22,8 @@ class MonteCarloSimulationIntegration:
         self.parallel_flag = False
         self.experiment_flag = False
         # Upper and Lower Bounds of Integral.
-        self.LOWER_BOUND = 0
-        self.UPPER_BOUND = 1
+        self.LOWER_BOUND = 1
+        self.UPPER_BOUND = 2
         # The area under the graph of a function can be found by adding slices that approach zero in width.
         self.SLICE_SIZE = 0.01
 
@@ -36,7 +36,7 @@ class MonteCarloSimulationIntegration:
     # (where the function heads up/down towards infinity). A vertical asymptote between lower bound and
     # upper bound affects the definite integral.
     def function(self, x):
-        return math.sqrt(1-x*x)
+        return 2*x
 
     def simulation_integration(self, number_of_simulations):
         if self.experiment_flag == True:

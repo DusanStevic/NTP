@@ -40,8 +40,8 @@ graph add: functionGraph.
 	abovePoints at: i put: 0@0.
 	x := (rand next * 55).
 	y:=(rand next * 3200).
-	a:= function value: x.
-	y<a
+	t:= function value: x.
+	y<t
 		ifTrue: [
 			belowPoints at: i put: x@y.]
 		ifFalse: [
