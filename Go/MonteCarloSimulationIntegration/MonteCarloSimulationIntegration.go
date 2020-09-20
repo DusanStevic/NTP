@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -197,23 +198,121 @@ func (MonteCarloSimulationIntegration *MonteCarloSimulationIntegration) exportIn
 	}
 
 }
+func exportScalingFile(scaling string, strongFlag bool) {
+	var path string
+	if strongFlag == true {
+		path = "C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Scaling Results\\Integration\\GolangIntegrationStrongScaling.csv"
+	} else {
+		path = "C:\\Users\\Dule\\Desktop\\NAPREDNE TEHNIKE PROGRAMIRANJA\\PROJEKAT\\NTP\\Scaling Results\\Integration\\GolangIntegrationWeakScaling.csv"
+	}
+	f, err := os.Create(path) // creating...
+	if err != nil {
+		fmt.Printf("Error while creating a file: %v", err)
+		return
+	}
+	defer f.Close()
+	// Writing to file
+	_, err = f.WriteString(scaling)
+	if err != nil {
+		fmt.Printf("Error while writing a file: %v", err)
+	}
 
-func main() {
-	numberOfSimulationsSerial := 1000
+}
+
+var serialPart float64 = 0.0
+var parallelPart float64 = 1.0
+
+func calculateAmdahlSpeedup(numberOfProcesses int) float64 {
+	return 1.0 / (serialPart + parallelPart/float64(numberOfProcesses))
+}
+
+func calculateGustafsonSpeedup(numberOfProcesses int) float64 {
+	return serialPart + parallelPart*float64(numberOfProcesses)
+}
+
+func strongScaling() {
+	fmt.Println("=======================")
+	fmt.Println("Start strong scaling:")
+	fmt.Println("=======================")
+	//One row in the output file.
+	var row strings.Builder
+	row.WriteString("number_of_processes,achieved_speedup,theoretical_maximum_speedup\r\n")
+	numberOfSimulations := 10000000
 	numberOfProcessesSerial := 1
 	monteCarloSimulationIntegrationSerial := MonteCarloSimulationIntegration{numberOfProcesses: numberOfProcessesSerial}
-	monteCarloSimulationIntegrationSerial.experimentFlag = false
-	fmt.Println("Integral Approximation by using the Monte Carlo simulation serial version")
-	serialIntegration, serialExecutionTime := monteCarloSimulationIntegrationSerial.mcsIntegrationSerial(numberOfSimulationsSerial)
-	fmt.Printf("Integral(n = %d, p = %d) = %f\r\n", numberOfSimulationsSerial, numberOfProcessesSerial, serialIntegration)
+	monteCarloSimulationIntegrationSerial.experimentFlag = true
+	fmt.Println("Integral approximation by using the Monte Carlo simulation serial version")
+	serialIntegration, serialExecutionTime := monteCarloSimulationIntegrationSerial.mcsIntegrationSerial(numberOfSimulations)
+	fmt.Printf("Integral(n = %d, p = %d) = %f\r\n", numberOfSimulations, numberOfProcessesSerial, serialIntegration)
 	fmt.Printf("Execution time (duration): %f seconds\r\n", serialExecutionTime)
+	for numberOfProcessesParallel := 2; numberOfProcessesParallel < 14; numberOfProcessesParallel++ {
+		monteCarloSimulationIntegrationParallel := MonteCarloSimulationIntegration{numberOfProcesses: numberOfProcessesParallel}
+		monteCarloSimulationIntegrationParallel.experimentFlag = true
+		fmt.Println("Integral approximation by using the Monte Carlo simulation parallel version")
+		parallelIntegration, parallelExecutionTime := monteCarloSimulationIntegrationParallel.mcsIntegrationParallel(numberOfSimulations)
+		fmt.Printf("Integral(n = %d, p = %d) = %f\r\n", numberOfSimulations, numberOfProcessesParallel, parallelIntegration)
+		fmt.Printf("Execution time (duration): %f seconds.\r\n", parallelExecutionTime)
+		achievedSpeedup := serialExecutionTime / parallelExecutionTime
+		theoreticalMaximumSpeedup := calculateAmdahlSpeedup(numberOfProcessesParallel)
+		fmt.Printf("Achieved speedup is: %f times.\r\n", achievedSpeedup)
+		fmt.Printf("Theoretical maximum speedup according to Amdahl’s law is: %f times.\r\n", theoreticalMaximumSpeedup)
+		row.WriteString(strconv.FormatInt(int64(numberOfProcessesParallel), 10) + "," + strconv.FormatFloat(achievedSpeedup, 'f', -1, 64) + "," + strconv.FormatInt(int64(theoreticalMaximumSpeedup), 10) + "\r\n")
+	}
+	exportScalingFile(row.String(), true)
+	fmt.Println("End strong scaling.")
 
-	numberOfSimulationsParallel := 1000
-	numberOfProcessesParallel := 4
-	monteCarloSimulationIntegrationParallel := MonteCarloSimulationIntegration{numberOfProcesses: numberOfProcessesParallel}
-	monteCarloSimulationIntegrationParallel.experimentFlag = false
-	fmt.Println("Integral Approximation by using the Monte Carlo simulation parallel version")
-	parallelIntegration, parallelExecutionTime := monteCarloSimulationIntegrationParallel.mcsIntegrationParallel(numberOfSimulationsParallel)
-	fmt.Printf("Integral(n = %d, p = %d) = %f\r\n", numberOfSimulationsParallel, numberOfProcessesParallel, parallelIntegration)
-	fmt.Printf("Execution time (duration): %f seconds", parallelExecutionTime)
+}
+
+func weakScaling() {
+	fmt.Println("=======================")
+	fmt.Println("Start weak scaling:")
+	fmt.Println("=======================")
+	//One row in the output file.
+	var row strings.Builder
+	row.WriteString("number_of_processes,achieved_speedup,theoretical_maximum_speedup\r\n")
+	numberOfSimulations := 10000000
+	for numberOfProcesses := 2; numberOfProcesses < 14; numberOfProcesses++ {
+		increasedNumberOfSimulations := numberOfSimulations * numberOfProcesses
+		monteCarloSimulationIntegration := MonteCarloSimulationIntegration{numberOfProcesses: numberOfProcesses}
+		monteCarloSimulationIntegration.experimentFlag = true
+		fmt.Println("Integral approximation by using the Monte Carlo simulation serial version")
+		serialIntegration, serialExecutionTime := monteCarloSimulationIntegration.mcsIntegrationSerial(increasedNumberOfSimulations)
+		fmt.Printf("Integral(n = %d, p = %d) = %f\r\n", increasedNumberOfSimulations, 1, serialIntegration)
+		fmt.Printf("Execution time (duration): %f seconds\r\n", serialExecutionTime)
+		fmt.Println("Integral approximation by using the Monte Carlo simulation parallel version")
+		parallelIntegration, parallelExecutionTime := monteCarloSimulationIntegration.mcsIntegrationParallel(increasedNumberOfSimulations)
+		fmt.Printf("Integral(n = %d, p = %d) = %f\r\n", increasedNumberOfSimulations, numberOfProcesses, parallelIntegration)
+		fmt.Printf("Execution time (duration): %f seconds.\r\n", parallelExecutionTime)
+		achievedSpeedup := serialExecutionTime / parallelExecutionTime
+		theoreticalMaximumSpeedup := calculateAmdahlSpeedup(numberOfProcesses)
+		fmt.Printf("Achieved speedup is: %f times.\r\n", achievedSpeedup)
+		fmt.Printf("Theoretical maximum speedup according to Amdahl’s law is: %f times.\r\n", theoreticalMaximumSpeedup)
+		row.WriteString(strconv.FormatInt(int64(numberOfProcesses), 10) + "," + strconv.FormatFloat(achievedSpeedup, 'f', -1, 64) + "," + strconv.FormatInt(int64(theoreticalMaximumSpeedup), 10) + "\r\n")
+	}
+	exportScalingFile(row.String(), false)
+	fmt.Println("End weak scaling.")
+
+}
+
+func main() {
+	/* 	numberOfSimulationsSerial := 1000
+	   	numberOfProcessesSerial := 1
+	   	monteCarloSimulationIntegrationSerial := MonteCarloSimulationIntegration{numberOfProcesses: numberOfProcessesSerial}
+	   	monteCarloSimulationIntegrationSerial.experimentFlag = false
+	   	fmt.Println("Integral Approximation by using the Monte Carlo simulation serial version")
+	   	serialIntegration, serialExecutionTime := monteCarloSimulationIntegrationSerial.mcsIntegrationSerial(numberOfSimulationsSerial)
+	   	fmt.Printf("Integral(n = %d, p = %d) = %f\r\n", numberOfSimulationsSerial, numberOfProcessesSerial, serialIntegration)
+	   	fmt.Printf("Execution time (duration): %f seconds\r\n", serialExecutionTime) */
+
+	/* 	numberOfSimulationsParallel := 1000
+	   	numberOfProcessesParallel := 4
+	   	monteCarloSimulationIntegrationParallel := MonteCarloSimulationIntegration{numberOfProcesses: numberOfProcessesParallel}
+	   	monteCarloSimulationIntegrationParallel.experimentFlag = false
+	   	fmt.Println("Integral Approximation by using the Monte Carlo simulation parallel version")
+	   	parallelIntegration, parallelExecutionTime := monteCarloSimulationIntegrationParallel.mcsIntegrationParallel(numberOfSimulationsParallel)
+	   	fmt.Printf("Integral(n = %d, p = %d) = %f\r\n", numberOfSimulationsParallel, numberOfProcessesParallel, parallelIntegration)
+	   	fmt.Printf("Execution time (duration): %f seconds", parallelExecutionTime) */
+
+	strongScaling()
+	weakScaling()
 }
