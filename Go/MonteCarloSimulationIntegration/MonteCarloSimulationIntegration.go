@@ -20,7 +20,7 @@ const (
 
 // mcs stands for Monte Carlo Simulation
 
-// MonteCarloSimulationIntegration is a structure to calculate pi using Monte Carlo simulation.
+// MonteCarloSimulationIntegration is a structure to calculate integral using Monte Carlo simulation.
 type MonteCarloSimulationIntegration struct {
 	numberOfProcesses int
 	parallelFlag      bool
