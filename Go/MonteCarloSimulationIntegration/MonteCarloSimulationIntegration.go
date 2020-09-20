@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -83,7 +82,26 @@ func (MonteCarloSimulationIntegration *MonteCarloSimulationIntegration) simulati
 	} else {
 		//One row in the output file.
 		var row strings.Builder
-		inside := 0
+		// Points under the graph of a function.
+		below := 0
+		lowerBoundInterval := lowerBound
+		upperBoundInterval := upperBound
+		// Define the interval between the lower and upper bound.
+		var x []float64
+		// Function Values
+		var y []float64
+		// Maximum of the function f(x) on the interval[lower_bound, upper_bound]
+		fMax := MonteCarloSimulationIntegration.function(lowerBound)
+		for lowerBoundInterval < upperBoundInterval {
+			x = append(x, lowerBoundInterval)
+			t := MonteCarloSimulationIntegration.function(lowerBoundInterval)
+			y = append(y, t)
+			if t > fMax {
+				fMax = t
+			}
+			lowerBoundInterval += sliceSize
+
+		}
 		// Source code for random number generator https://play.golang.org/p/ZdFpbahgC1
 		// The default number generator is deterministic, so it'll
 		// produce the same sequence of numbers each time by default.
@@ -103,18 +121,26 @@ func (MonteCarloSimulationIntegration *MonteCarloSimulationIntegration) simulati
 		for i := 0; i < numberOfSimulations; i++ {
 			// Call the resulting `rand.Rand` just like the
 			// functions on the `rand` package.
-			x := r.Float64()
-			y := r.Float64()
-
-			// Pharo for Data Visualization. Circle of radius 250 centered at the point(250, 250).
-			// To create a Rectangle in Pharo you must provide the top left and the bottom right points.
-			row.WriteString(strconv.FormatInt(int64(x*500), 10) + " " + strconv.FormatInt(int64(y*500), 10) + "\r\n")
-			if (x*x + y*y) < 1 {
-				inside++
+			xRand := lowerBound + (upperBound-lowerBound)*r.Float64()
+			yRand := 0 + fMax*r.Float64()
+			xRandString := fmt.Sprintf("%.2f", xRand)
+			yRandString := fmt.Sprintf("%.2f", yRand)
+			row.WriteString(xRandString + " " + yRandString + "\r\n")
+			if yRand < MonteCarloSimulationIntegration.function(xRand) {
+				below++
 			}
 		}
+		// Rectangle area that surrounds the area under the graph of a function.
+		a := upperBound - lowerBound
+		b := fMax - 0
+		rectangleArea := a * b
+		// bellow = Points under the graph of a function.
+		// number_of_simulations = Total number of points = Points inside rectangle
+		proportion := float64(below) / float64(numberOfSimulations)
+		integral := float64(proportion) * float64(rectangleArea)
 		MonteCarloSimulationIntegration.exportIntegrationFile(row.String())
-		channel <- float64(inside)
+		channel <- integral
+
 	}
 
 }
@@ -173,19 +199,19 @@ func (MonteCarloSimulationIntegration *MonteCarloSimulationIntegration) exportIn
 }
 
 func main() {
-	numberOfSimulationsSerial := 1000000000
+	numberOfSimulationsSerial := 1000
 	numberOfProcessesSerial := 1
 	monteCarloSimulationIntegrationSerial := MonteCarloSimulationIntegration{numberOfProcesses: numberOfProcessesSerial}
-	monteCarloSimulationIntegrationSerial.experimentFlag = true
+	monteCarloSimulationIntegrationSerial.experimentFlag = false
 	fmt.Println("Integral Approximation by using the Monte Carlo simulation serial version")
 	serialIntegration, serialExecutionTime := monteCarloSimulationIntegrationSerial.mcsIntegrationSerial(numberOfSimulationsSerial)
 	fmt.Printf("Integral(n = %d, p = %d) = %f\r\n", numberOfSimulationsSerial, numberOfProcessesSerial, serialIntegration)
 	fmt.Printf("Execution time (duration): %f seconds\r\n", serialExecutionTime)
 
-	numberOfSimulationsParallel := 1000000000
+	numberOfSimulationsParallel := 1000
 	numberOfProcessesParallel := 4
 	monteCarloSimulationIntegrationParallel := MonteCarloSimulationIntegration{numberOfProcesses: numberOfProcessesParallel}
-	monteCarloSimulationIntegrationParallel.experimentFlag = true
+	monteCarloSimulationIntegrationParallel.experimentFlag = false
 	fmt.Println("Integral Approximation by using the Monte Carlo simulation parallel version")
 	parallelIntegration, parallelExecutionTime := monteCarloSimulationIntegrationParallel.mcsIntegrationParallel(numberOfSimulationsParallel)
 	fmt.Printf("Integral(n = %d, p = %d) = %f\r\n", numberOfSimulationsParallel, numberOfProcessesParallel, parallelIntegration)
