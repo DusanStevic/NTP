@@ -61,13 +61,12 @@ integral:= 0.
 			abovePoints at: i put: x@y.].
 
 
- "Rectangle area that surrounds the area under the graph of a function."  
- "Interval size = Upper bound - Lower bound"  
+"Rectangle area that surrounds the area under the graph of a function." "Interval size = Upper bound - Lower bound."  
 a := intervalSize. 
 b := fMax - 0.
 rectangleArea := a * b.
 "bellow = Points under the graph of a function."
-"number_of_simulations = Total number of points = Points inside rectangle"
+"numberOfSimulations = Total number of points = Points inside rectangle"
 proportion := below/(m numberOfSimulations).
 integral := proportion * rectangleArea.
 integral:= integral asFloat.
