@@ -1,4 +1,4 @@
-m := MonteCarloSimulationIntegration  new.
+﻿m := MonteCarloSimulationIntegration  new.
 m load: 'C:\Users\Dule\Desktop\NAPREDNE TEHNIKE PROGRAMIRANJA\PROJEKAT\NTP\Execution Results\Integration\PythonIntegrationSerial.txt'.
 
 "The function f(x) to be integrated is called the integrand.
@@ -14,9 +14,11 @@ function := [ :x | 2 * x ].
 lowerBound := 1.
 "Upper Bound of Integral."
 upperBound := 2.
+"Interval size = Upper bound - Lower bound"
+intervalSize := upperBound - lowerBound.
 "The area under the graph of a function can be found by adding slices that approach zero in width."
 sliceSize := 0.01.
-rand := Random new.
+
 belowPoints := Array new: m numberOfSimulations.
 abovePoints := Array new: m numberOfSimulations.
 belowGraph := RTData new.
@@ -59,7 +61,18 @@ integral:= 0.
 			abovePoints at: i put: x@y.].
 
 
-
+ "Rectangle area that surrounds the area under the graph of a function."  
+ "Interval size = Upper bound - Lower bound"  
+a := intervalSize. 
+b := fMax - 0.
+rectangleArea := a * b.
+"bellow = Points under the graph of a function."
+"number_of_simulations = Total number of points = Points inside rectangle"
+proportion := below/(m numberOfSimulations).
+integral := proportion * rectangleArea.
+integral:= integral asFloat.
+str := 'n=', i asString ,',integral≈', integral asString.
+Transcript show: str asString; cr
 		
 ].
 

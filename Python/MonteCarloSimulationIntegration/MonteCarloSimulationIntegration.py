@@ -149,7 +149,7 @@ class MonteCarloSimulationIntegration:
 
 if __name__ == "__main__":
 
-    number_of_simulations_serial = 100
+    number_of_simulations_serial = 1000
     number_of_processes_serial = 1
     monte_carlo_simulation_integration_serial = MonteCarloSimulationIntegration(number_of_processes_serial)
     monte_carlo_simulation_integration_serial.experiment_flag = False
@@ -160,7 +160,7 @@ if __name__ == "__main__":
                                                  serial_integration))
     print("Execution time (duration): {} seconds".format(serial_execution_time))
 
-    number_of_simulations_parallel = 100
+    number_of_simulations_parallel = 1000
     number_of_processes_parallel = 4
     monte_carlo_simulation_integration_parallel = MonteCarloSimulationIntegration(number_of_processes_parallel)
     monte_carlo_simulation_integration_parallel.experiment_flag = False
